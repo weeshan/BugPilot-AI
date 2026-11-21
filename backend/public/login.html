@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>BugPilot AI - Login</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 24px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 36px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #60a5fa;
+            margin: 0;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 32px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 20px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 2px solid #60a5fa;
+        }
+
+        button {
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 8px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            font-weight: bold;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .guest-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 8px;
+            background: transparent;
+            color: #cbd5e1;
+            border: 1px solid #475569;
+        }
+
+        .guest-btn:hover:not(:disabled) {
+            background: #334155;
+        }
+
+        .divider {
+            text-align: center;
+            color: #64748b;
+            margin: 20px 0;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.8;
+        }
+
+        .text-link {
+            background: none;
+            border: none;
+            padding: 0;
+            color: #60a5fa;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .text-link:hover {
+            text-decoration: underline;
+        }
+
+        #message {
+            text-align: center;
+            min-height: 20px;
+            margin-top: 18px;
+            color: #f87171;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: -12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card">
+
+        <div class="logo">🐛</div>
+
+        <h1>BugPilot AI</h1>
+
+        <p class="subtitle">
+            Software Bug Tracking System
+        </p>
+
+        <!-- ================================== -->
+        <!-- 1. LOGIN SECTION -->
+        <!-- ================================== -->
+
+        <div id="loginSection">
+
+            <form id="loginForm">
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Enter your username"
+                    autocomplete="username"
+                    maxlength="50"
+                    required
+                >
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button
+                    class="login-btn"
+                    id="loginBtn"
+                    type="submit"
+                >
+                    Sign In
+                </button>
+
+            </form>
+
+            <div class="divider">OR</div>
+
+            <button
+                class="guest-btn"
+                id="guestBtn"
+                type="button"
+            >
+                Continue as Guest
+            </button>
+
+            <p class="signup-link">
+                Don't have an account?
+
+                <button
+                    class="text-link"
+                    id="showRegisterBtn"
+                    type="button"
+                >
+                    Create Account
+                </button>
+            </p>
+
+        </div>
+
+        <!-- ================================== -->
+        <!-- 2. CREATE ACCOUNT SECTION -->
+        <!-- ================================== -->
+
+        <div
+            id="registerSection"
+            class="hidden"
+        >
+
+            <form id="registerForm">
+
+                <label for="registerUsername">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="registerUsername"
+                    placeholder="Choose a username"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="50"
+                    pattern="[A-Za-z0-9_.-]{3,50}"
+                    title="Use 3-50 letters, numbers, underscores, dots or hyphens."
+                    required
+                >
+
+                <label for="registerEmail">
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    maxlength="254"
+                    required
+                >
+
+                <label for="registerPassword">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+                <p class="password-hint">
+                    At least 8 characters.
+                </p>
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    placeholder="Confirm your password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+                <button
+                    class="login-btn"
+                    id="registerBtn"
+                    type="submit"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="signup-link">
+                Already have an account?
+
+                <button
+                    class="text-link"
+                    id="showLoginBtn"
+                    type="button"
+                >
+                    Sign In
+                </button>
+            </p>
+
+        </div>
+
+        <!-- ================================== -->
+        <!-- 3. STATUS MESSAGE -->
+        <!-- ================================== -->
+
+        <p
+            id="message"
+            role="status"
+            aria-live="polite"
+        ></p>
+
+    </div>
+
+    <script>
+
+        // ==================================
+        // 1. ELEMENT REFERENCES
+        // ==================================
+
+        const loginSection =
+            document.getElementById("loginSection");
+
+        const registerSection =
+            document.getElementById("registerSection");
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+        const registerForm =
+            document.getElementById("registerForm");
+
+        const message =
+            document.getElementById("message");
+
+        const loginBtn =
+            document.getElementById("loginBtn");
+
+        const registerBtn =
+            document.getElementById("registerBtn");
+
+        const guestBtn =
+            document.getElementById("guestBtn");
+
+        // ==================================
+        // 2. STATUS MESSAGE HELPER
+        // ==================================
+
+        function showMessage(text, type = "error") {
+
+            message.textContent = text;
+
+            if (type === "success") {
+                message.style.color = "#4ade80";
+            } else if (type === "info") {
+                message.style.color = "#93c5fd";
+            } else {
+                message.style.color = "#f87171";
+            }
+        }
+
+        function clearMessage() {
+            message.textContent = "";
+        }
+
+        // ==================================
+        // 3. SWITCH TO REGISTRATION
+        // ==================================
+
+        function showRegister() {
+
+            loginSection.classList.add("hidden");
+
+            registerSection.classList.remove("hidden");
+
+            document.title = "BugPilot AI - Create Account";
+
+            clearMessage();
+
+            document.getElementById(
+                "registerUsername"
+            ).focus();
+        }
+
+        document.getElementById("showRegisterBtn")
+            .addEventListener("click", showRegister);
+
+        // ==================================
+        // 4. SWITCH TO LOGIN
+        // ==================================
+
+        function showLogin() {
+
+            registerSection.classList.add("hidden");
+
+            loginSection.classList.remove("hidden");
+
+            document.title = "BugPilot AI - Login";
+
+            clearMessage();
+
+            document.getElementById(
+                "username"
+            ).focus();
+        }
+
+        document.getElementById("showLoginBtn")
+            .addEventListener("click", showLogin);
+
+        // ==================================
+        // 5. LOGIN
+        // POST /api/auth/login
+        // ==================================
+
+        loginForm.addEventListener(
+            "submit",
+            async (event) => {
+
+                event.preventDefault();
+
+                const username =
+                    document.getElementById(
+                        "username"
+                    ).value.trim();
+
+                const password =
+                    document.getElementById(
+                        "password"
+                    ).value;
+
+                showMessage("Signing in...", "info");
+
+                loginBtn.disabled = true;
+
+                try {
+
+                    const response = await fetch(
+                        "/api/auth/login",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                username,
+                                password
+                            })
+                        }
+                    );
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            result.message || "Login failed."
+                        );
+                    }
+
+                    showMessage(
+                        "Login successful! Redirecting...",
+                        "success"
+                    );
+
+                    window.location.href = "/";
+
+                } catch (error) {
+
+                    showMessage(
+                        error.message || "Login failed.",
+                        "error"
+                    );
+
+                } finally {
+
+                    loginBtn.disabled = false;
+
+                }
+            }
+        );
+
+        // ==================================
+        // 6. REGISTER ACCOUNT
+        // POST /api/auth/register
+        // ==================================
+
+        registerForm.addEventListener(
+            "submit",
+            async (event) => {
+
+                event.preventDefault();
+
+                const username =
+                    document.getElementById(
+                        "registerUsername"
+                    ).value.trim();
+
+                const email =
+                    document.getElementById(
+                        "registerEmail"
+                    ).value.trim();
+
+                const password =
+                    document.getElementById(
+                        "registerPassword"
+                    ).value;
+
+                const confirmPassword =
+                    document.getElementById(
+                        "confirmPassword"
+                    ).value;
+
+                // Check password confirmation
+                if (password !== confirmPassword) {
+
+                    showMessage(
+                        "Passwords do not match.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                // Match the backend's bcrypt input limit
+                if (
+                    new TextEncoder().encode(password).length > 72
+                ) {
+                    showMessage(
+                        "Password cannot exceed 72 UTF-8 bytes.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                showMessage(
+                    "Creating your account...",
+                    "info"
+                );
+
+                registerBtn.disabled = true;
+
+                try {
+
+                    const response = await fetch(
+                        "/api/auth/register",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                username,
+                                email,
+                                password,
+                                confirmPassword
+                            })
+                        }
+                    );
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            result.message ||
+                            "Account creation failed."
+                        );
+                    }
+
+                    // Registration succeeded
+                    registerForm.reset();
+
+                    // Fill in new username on login form
+                    document.getElementById(
+                        "username"
+                    ).value = username;
+
+                    // Return to login view
+                    showLogin();
+
+                    showMessage(
+                        "Account created successfully! Please sign in.",
+                        "success"
+                    );
+
+                } catch (error) {
+
+                    showMessage(
+                        error.message ||
+                        "Account creation failed.",
+                        "error"
+                    );
+
+                } finally {
+
+                    registerBtn.disabled = false;
+
+                }
+            }
+        );
+
+        // ==================================
+        // 7. GUEST LOGIN
+        // POST /api/auth/guest
+        // ==================================
+
+        guestBtn.addEventListener(
+            "click",
+            async () => {
+
+                showMessage(
+                    "Entering guest mode...",
+                    "info"
+                );
+
+                guestBtn.disabled = true;
+
+                try {
+
+                    const response = await fetch(
+                        "/api/auth/guest",
+                        {
+                            method: "POST"
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(
+                            "Guest login failed."
+                        );
+                    }
+
+                    window.location.href = "/";
+
+                } catch (error) {
+
+                    showMessage(
+                        error.message ||
+                        "Guest login failed.",
+                        "error"
+                    );
+
+                } finally {
+
+                    guestBtn.disabled = false;
+
+                }
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

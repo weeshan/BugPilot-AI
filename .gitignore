@@ -1,0 +1,10 @@
+backend/node_modules/
+backend/.env
+
+# macOS
+.DS_Store
+
+# Temporary backup files
+backend/server.backup.js
+backend/server.before-*.js
+backend/package-lock.backup.json

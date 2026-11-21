@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BugPilot AI - Issues</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 32px;
+    }
+
+    h1 { color: #60a5fa; }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      padding: 12px;
+      background: #1e293b;
+      color: white;
+      border: 1px solid #475569;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1e293b;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+
+    th { background: #334155; }
+
+    tr:hover { background: #283548; }
+
+    .table-container { overflow-x: auto; }
+
+    #message { color: #93c5fd; }
+  </style>
+</head>
+
+<body>
+  <h1>🐛 BugPilot AI</h1>
+  <div style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 20px 0;
+">
+
+    <span id="currentUser">
+        Checking session...
+    </span>
+
+    <button id="logoutBtn" style="
+        background: #dc2626;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    ">
+        Logout
+    </button>
+
+</div>
+
+  <p>Software Bug Tracking Dashboard</p>
+
+  <h2>Issue Management</h2>
+
+  <div class="controls">
+    <input
+      type="text"
+      id="search"
+      placeholder="Search bugs..."
+    >
+
+    <select id="severity">
+      <option value="">All Severities</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+      <option value="Critical">Critical</option>
+    </select>
+  </div>
+
+  <p id="message">Loading issues...</p>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Issue</th>
+          <th>Project</th>
+          <th>Severity</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="issuesTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let allIssues = [];
+
+    async function loadIssues() {
+      try {
+        const response = await fetch("/api/issues");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch issues");
+        }
+
+        const result = await response.json();
+
+        allIssues = result.data;
+        displayIssues(allIssues);
+
+      } catch (error) {
+        document.getElementById("message").textContent =
+          "Error loading issues: " + error.message;
+      }
+    }
+
+    function displayIssues(issues) {
+      const table = document.getElementById("issuesTable");
+      table.innerHTML = "";
+
+      issues.forEach(issue => {
+        const row = document.createElement("tr");
+
+        const values = [
+          issue.issue_id,
+          issue.title,
+          issue.project_name,
+          issue.severity,
+          issue.status
+        ];
+
+        values.forEach(value => {
+          const cell = document.createElement("td");
+          cell.textContent = value ?? "";
+          row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+      });
+
+      document.getElementById("message").textContent =
+        `Showing ${issues.length} of ${allIssues.length} issues`;
+    }
+
+    function filterIssues() {
+      const search = document.getElementById("search")
+        .value.toLowerCase();
+
+      const severity = document.getElementById("severity").value;
+
+      const filtered = allIssues.filter(issue => {
+        const matchesSearch =
+          issue.title.toLowerCase().includes(search) ||
+          issue.project_name.toLowerCase().includes(search);
+
+        const matchesSeverity =
+          severity === "" || issue.severity === severity;
+
+        return matchesSearch && matchesSeverity;
+      });
+
+      displayIssues(filtered);
+    }
+
+    document.getElementById("search")
+      .addEventListener("input", filterIssues);
+
+    document.getElementById("severity")
+      .addEventListener("change", filterIssues);
+
+    loadIssues();
+  </script>
+  <script>
+    // Display the logged-in user
+    async function checkCurrentUser() {
+        try {
+            const response = await fetch("/api/auth/me");
+
+            if (!response.ok) {
+                window.location.href = "/login";
+                return;
+            }
+
+            const result = await response.json();
+
+            document.getElementById("currentUser").textContent =
+                `Logged in as: ${result.user.username} ` +
+                `(${result.user.role})`;
+
+        } catch (error) {
+            console.error("Session check failed:", error);
+        }
+    }
+
+    // Logout button
+    document.getElementById("logoutBtn")
+        .addEventListener("click", async () => {
+            try {
+                const response = await fetch("/api/auth/logout", {
+                    method: "POST"
+                });
+
+                if (!response.ok) {
+                    throw new Error("Logout failed.");
+                }
+
+                window.location.href = "/login";
+
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+    checkCurrentUser();
+</script>
+</body>
+</html>
