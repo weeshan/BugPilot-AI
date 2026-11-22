@@ -140,13 +140,53 @@
             margin-right: 15px;
         }
 
+        /* Report search and export toolbar */
+        .report-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .report-search {
+            flex: 1;
+            min-width: 200px;
+            padding: 11px 13px;
+            background: #0f172a;
+            color: white;
+            border: 1px solid #475569;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        .report-search:focus {
+            outline: 2px solid #3b82f6;
+        }
+
+        .clear-search-btn {
+            background: #475569;
+        }
+
+        .export-btn {
+            background: #059669;
+        }
+
+        .export-btn:hover {
+            background: #047857;
+        }
+
+        .record-count {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding: 15px;
             }
         }
-
-        
     </style>
 </head>
 
@@ -277,7 +317,7 @@
         panel.className = "panel";
 
         const heading = document.createElement("h2");
-        heading.textContent = `${report.title} (${rows.length} records)`;
+        heading.textContent = report.title;
         panel.appendChild(heading);
 
         if (!rows.length) {
@@ -287,6 +327,32 @@
             panel.appendChild(message);
             return panel;
         }
+
+        // Search and export toolbar
+        const toolbar = document.createElement("div");
+        toolbar.className = "report-toolbar";
+
+        const search = document.createElement("input");
+        search.type = "text";
+        search.className = "report-search";
+        search.placeholder = `Search ${report.title}...`;
+        search.setAttribute("aria-label", `Search ${report.title}`);
+
+        const clearButton = document.createElement("button");
+        clearButton.textContent = "Clear";
+        clearButton.className = "clear-search-btn";
+
+        const exportButton = document.createElement("button");
+        exportButton.textContent = "Export CSV";
+        exportButton.className = "export-btn";
+
+        toolbar.append(search, clearButton, exportButton);
+        panel.appendChild(toolbar);
+
+        // Record count
+        const recordCount = document.createElement("p");
+        recordCount.className = "record-count";
+        panel.appendChild(recordCount);
 
         const wrapper = document.createElement("div");
         wrapper.className = "table-wrapper";
@@ -322,7 +388,107 @@
         wrapper.appendChild(table);
         panel.appendChild(wrapper);
 
+        // Update visible record count
+        function updateCount() {
+            const visibleRows = [...tbody.querySelectorAll("tr")]
+                .filter(row => row.style.display !== "none").length;
+
+            recordCount.textContent =
+                `Showing ${visibleRows} of ${rows.length} records`;
+        }
+
+        // Search/filter table
+        search.addEventListener("input", () => {
+            const query = search.value.trim().toLowerCase();
+
+            [...tbody.querySelectorAll("tr")].forEach(row => {
+                const matches = row.textContent
+                    .toLowerCase()
+                    .includes(query);
+
+                row.style.display = matches ? "" : "none";
+            });
+
+            updateCount();
+        });
+
+        // Clear search
+        clearButton.addEventListener("click", () => {
+            search.value = "";
+
+            [...tbody.querySelectorAll("tr")].forEach(row => {
+                row.style.display = "";
+            });
+
+            updateCount();
+            search.focus();
+        });
+
+        // Export all records to CSV
+        exportButton.addEventListener("click", () => {
+            exportCSV(report, columns, rows);
+        });
+
+        updateCount();
+
         return panel;
+    }
+
+    // Export report data as a CSV file
+    function exportCSV(report, columns, rows) {
+        // Escape CSV values properly
+        function escapeCSV(value) {
+            if (value === null || value === undefined) {
+                return '""';
+            }
+
+            let textValue;
+
+            if (typeof value === "object") {
+                textValue = JSON.stringify(value);
+            } else {
+                textValue = String(value);
+            }
+
+            return `"${textValue.replace(/"/g, '""')}"`;
+        }
+
+        // Create CSV header
+        const header = columns
+            .map(column => escapeCSV(column))
+            .join(",");
+
+        // Create CSV data rows
+        const dataRows = rows.map(row =>
+            columns
+                .map(column => escapeCSV(row[column]))
+                .join(",")
+        );
+
+        const csvContent = [
+            header,
+            ...dataRows
+        ].join("\r\n");
+
+        // UTF-8 BOM helps Excel recognize the encoding
+        const blob = new Blob(
+            ["\uFEFF" + csvContent],
+            { type: "text/csv;charset=utf-8;" }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        const filename = report.id.replace(/[^a-z0-9-]/gi, "-");
+
+        link.href = url;
+        link.download = `bugpilot-${filename}.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        URL.revokeObjectURL(url);
     }
 
     // Generate severity chart
@@ -403,6 +569,11 @@
         const container = document.getElementById("viewsContainer");
         container.replaceChildren();
 
+        // Clear old report data before refreshing
+        Object.keys(reportData).forEach(key => {
+            delete reportData[key];
+        });
+
         const loading = document.createElement("p");
         loading.className = "status";
         loading.textContent = "Loading reports...";
@@ -473,11 +644,25 @@
         }
     }
 
-    // Verify login before loading reports
+    // Verify login and configure dashboard navigation
     async function initializeReports() {
         try {
-            await api("/api/auth/me");
+            const result = await api("/api/auth/me");
+
+            // Send users back to their correct dashboard
+            const role = result.user.role;
+
+            const dashboardRoutes = {
+                admin: "/admin",
+                user: "/dashboard",
+                guest: "/guest"
+            };
+
+            document.querySelector(".back-link").href =
+                dashboardRoutes[role] || "/login";
+
             await loadReports();
+
         } catch (error) {
             console.error("Could not initialize reports:", error);
 
