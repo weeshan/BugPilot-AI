@@ -21,6 +21,7 @@ const { requireRole } = require("./middleware/auth");
 
 const authRoutes = require("./routes/auth");
 const issueRoutes = require("./routes/issues");
+const viewsRoutes = require("./routes/views");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -180,7 +181,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/issues", issueRoutes);
 
 // ==========================================
-// 8. ADMIN - GET ALL USERS
+// 8. REPORTING / SQL VIEW ROUTES
+// ==========================================
+
+app.use("/api/views", viewsRoutes);
+
+// ==========================================
+// 9. ADMIN - GET ALL USERS
 // ==========================================
 
 app.get(
@@ -213,7 +220,7 @@ app.get(
 );
 
 // ==========================================
-// 9. ADMIN - UPDATE USER ACCOUNT
+// 10. ADMIN - UPDATE USER ACCOUNT
 // PATCH /api/admin/users/:id
 // ==========================================
 
@@ -292,7 +299,7 @@ app.patch(
 );
 
 // ==========================================
-// 10. WEBSITE ROUTES
+// 11. WEBSITE ROUTES
 // ==========================================
 
 // Login page
@@ -313,6 +320,14 @@ app.get("/index.html", (req, res) => {
     return res.redirect("/");
 });
 
+// Report page
+app.get("/reports", requireRole("admin", "user"), (req, res) => {
+    res.set("Cache-Control", "no-store");
+    return res.sendFile(
+        path.join(__dirname, "public", "reports.html")
+    );
+});
+
 // Shared dashboard HTML.
 // Role-specific content is rendered by index.html.
 function serveDashboard(req, res) {
@@ -324,7 +339,7 @@ function serveDashboard(req, res) {
 }
 
 // ==========================================
-// 11. ADMIN DASHBOARD
+// 12. ADMIN DASHBOARD
 // ==========================================
 
 app.get(
@@ -334,7 +349,7 @@ app.get(
 );
 
 // ==========================================
-// 12. REGULAR USER DASHBOARD
+// 13. REGULAR USER DASHBOARD
 // ==========================================
 
 app.get(
@@ -344,7 +359,7 @@ app.get(
 );
 
 // ==========================================
-// 13. GUEST DASHBOARD
+// 15. GUEST DASHBOARD
 // ==========================================
 
 app.get(
@@ -354,7 +369,7 @@ app.get(
 );
 
 // ==========================================
-// 14. HOME PAGE / ROLE REDIRECTION
+// 16. HOME PAGE / ROLE REDIRECTION
 // ==========================================
 
 app.get("/", (req, res) => {
@@ -380,7 +395,7 @@ app.get("/", (req, res) => {
 });
 
 // ==========================================
-// 15. UNKNOWN API ENDPOINTS
+// 17. UNKNOWN API ENDPOINTS
 // ==========================================
 
 app.use("/api", (req, res) => {
@@ -391,7 +406,7 @@ app.use("/api", (req, res) => {
 });
 
 // ==========================================
-// 16. CENTRALIZED ERROR HANDLING
+// 18. CENTRALIZED ERROR HANDLING
 // ==========================================
 
 app.use((error, req, res, next) => {
@@ -438,7 +453,7 @@ app.use((error, req, res, next) => {
 });
 
 // ==========================================
-// 17. START BUGPILOT AI SERVER
+// 19. START BUGPILOT AI SERVER
 // ==========================================
 
 async function startServer() {

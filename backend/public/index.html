@@ -87,6 +87,21 @@
       color: #93c5fd;
     }
 
+    .nav-btn {
+      display: inline-block;
+      padding: 11px 18px;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #1d4ed8;
+    }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -327,6 +342,9 @@
     <div class="account">
       <span id="currentUser">Checking session...</span>
       <span id="rolePill" class="badge" hidden></span>
+      <a href="/reports" id="reportsLink" class="nav-btn" hidden>
+          Reports
+      </a>
       <button id="logoutBtn" class="danger">
         Logout
       </button>
@@ -639,6 +657,7 @@
 
       if (["admin", "user"].includes(currentUser.role)) {
         $("newIssueBtn").hidden = false;
+        $("reportsLink").hidden = false;
       }
 
       await loadIssues();

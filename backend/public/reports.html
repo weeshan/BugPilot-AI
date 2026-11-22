@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BugPilot AI - Reports</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 30px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin-bottom: 18px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .card, .panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 22px;
+        }
+
+        .card p {
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .card h2 {
+            font-size: 30px;
+            margin: 0;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            height: 280px;
+            position: relative;
+        }
+
+        .views-container {
+            display: grid;
+            gap: 22px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 13px;
+            border-bottom: 1px solid #334155;
+            font-size: 13px;
+        }
+
+        th {
+            color: #93c5fd;
+            background: #263449;
+        }
+
+        tr:hover td {
+            background: #263449;
+        }
+
+        .status {
+            color: #94a3b8;
+            padding: 12px 0;
+        }
+
+        .error {
+            color: #f87171;
+        }
+
+        .back-link {
+            color: #93c5fd;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+        }
+
+        
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h1>Reporting Dashboard</h1>
+        <p class="subtitle">BugPilot AI - Database Analytics</p>
+    </div>
+
+    <div>
+        <a href="/dashboard" class="back-link">Back to Dashboard</a>
+        <button onclick="loadReports()">Refresh Reports</button>
+    </div>
+</header>
+
+<!-- SUMMARY CARDS -->
+<section class="summary-grid">
+    <div class="card">
+        <p>Urgent Issues</p>
+        <h2 id="urgentCount">--</h2>
+    </div>
+
+    <div class="card">
+        <p>Active Developers</p>
+        <h2 id="developerCount">--</h2>
+    </div>
+
+    <div class="card">
+        <p>Projects</p>
+        <h2 id="projectCount">--</h2>
+    </div>
+
+    <div class="card">
+        <p>Accepted Solutions</p>
+        <h2 id="solutionCount">--</h2>
+    </div>
+</section>
+
+<!-- CHARTS -->
+<section class="chart-grid">
+    <div class="panel">
+        <h2>Issue Severity Distribution</h2>
+        <div class="chart-container">
+            <canvas id="severityChart"></canvas>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Developer Workload</h2>
+        <div class="chart-container">
+            <canvas id="workloadChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- SQL VIEW TABLES -->
+<section>
+    <h2>SQL View Reports</h2>
+    <p class="subtitle" style="margin-bottom: 20px;">
+        Results generated directly from the ten Phase II SQL views.
+    </p>
+
+    <div id="viewsContainer" class="views-container">
+        <p class="status">Loading reports...</p>
+    </div>
+</section>
+
+<script>
+    // API endpoint names and display titles
+    const reports = [
+        { id: "issue-details", title: "Issue Details" },
+        { id: "projects-above-average", title: "Projects Above Average Issues" },
+        { id: "developers-with-solutions", title: "Developers With Solutions" },
+        { id: "projects-and-documents", title: "Projects and Documents" },
+        { id: "active-developers", title: "Active Developers" },
+        { id: "urgent-issues", title: "Urgent Issues" },
+        { id: "accepted-solutions", title: "Accepted Solutions" },
+        { id: "developer-workload", title: "Developer Workload" },
+        { id: "issue-documentation", title: "Issue Documentation" },
+        { id: "project-issue-statistics", title: "Project Issue Statistics" }
+    ];
+
+    const reportData = {};
+    let severityChart = null;
+    let workloadChart = null;
+
+    // Fetch data from the backend
+    async function api(url) {
+        const response = await fetch(url, {
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+
+        const result = await response.json();
+
+        if (response.status === 401) {
+            window.location.href = "/";
+            throw new Error("Please log in again.");
+        }
+
+        if (!response.ok) {
+            throw new Error(result.message || "Request failed.");
+        }
+
+        return result;
+    }
+
+    // Safely create table cells
+    function createCell(value, isHeader = false) {
+        const cell = document.createElement(isHeader ? "th" : "td");
+
+        if (value === null || value === undefined) {
+            cell.textContent = "—";
+        } else if (typeof value === "object") {
+            cell.textContent = JSON.stringify(value);
+        } else {
+            cell.textContent = String(value);
+        }
+
+        return cell;
+    }
+
+    // Generate a table for each SQL view
+    function displayTable(report, rows) {
+        const panel = document.createElement("div");
+        panel.className = "panel";
+
+        const heading = document.createElement("h2");
+        heading.textContent = `${report.title} (${rows.length} records)`;
+        panel.appendChild(heading);
+
+        if (!rows.length) {
+            const message = document.createElement("p");
+            message.className = "status";
+            message.textContent = "No records found.";
+            panel.appendChild(message);
+            return panel;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-wrapper";
+
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+
+        const columns = Object.keys(rows[0]);
+
+        columns.forEach(column => {
+            headerRow.appendChild(
+                createCell(column.replaceAll("_", " "), true)
+            );
+        });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        rows.forEach(row => {
+            const tr = document.createElement("tr");
+
+            columns.forEach(column => {
+                tr.appendChild(createCell(row[column]));
+            });
+
+            tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        wrapper.appendChild(table);
+        panel.appendChild(wrapper);
+
+        return panel;
+    }
+
+    // Generate severity chart
+    function createSeverityChart(rows) {
+        const counts = {};
+
+        rows.forEach(row => {
+            const severity = row.severity || "Unknown";
+            counts[severity] = (counts[severity] || 0) + 1;
+        });
+
+        if (severityChart) severityChart.destroy();
+
+        severityChart = new Chart(
+            document.getElementById("severityChart"),
+            {
+                type: "doughnut",
+                data: {
+                    labels: Object.keys(counts),
+                    datasets: [{
+                        data: Object.values(counts)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        );
+    }
+
+    // Generate workload chart using detected columns
+    function createWorkloadChart(rows) {
+        if (!rows.length) return;
+
+        const columns = Object.keys(rows[0]);
+
+        const nameColumn = columns.find(key =>
+            /developer.*name|name/i.test(key)
+        );
+
+        const workloadColumn = columns.find(key =>
+            /workload|assigned|issue_count|total_issues|count/i.test(key)
+        );
+
+        if (!nameColumn || !workloadColumn) return;
+
+        if (workloadChart) workloadChart.destroy();
+
+        workloadChart = new Chart(
+            document.getElementById("workloadChart"),
+            {
+                type: "bar",
+                data: {
+                    labels: rows.map(row => row[nameColumn]),
+                    datasets: [{
+                        label: workloadColumn.replaceAll("_", " "),
+                        data: rows.map(row =>
+                            Number(row[workloadColumn]) || 0
+                        )
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+        );
+    }
+
+    // Load all ten reports
+    async function loadReports() {
+        const container = document.getElementById("viewsContainer");
+        container.replaceChildren();
+
+        const loading = document.createElement("p");
+        loading.className = "status";
+        loading.textContent = "Loading reports...";
+        container.appendChild(loading);
+
+        const results = await Promise.allSettled(
+            reports.map(async report => {
+                const result = await api(
+                    `/api/views/${report.id}`
+                );
+
+                return {
+                    report,
+                    rows: result.data
+                };
+            })
+        );
+
+        container.replaceChildren();
+
+        results.forEach((result, index) => {
+            const report = reports[index];
+
+            if (result.status === "fulfilled") {
+                const { rows } = result.value;
+
+                reportData[report.id] = rows;
+
+                container.appendChild(
+                    displayTable(report, rows)
+                );
+            } else {
+                const panel = document.createElement("div");
+                panel.className = "panel";
+
+                const heading = document.createElement("h2");
+                heading.textContent = report.title;
+
+                const message = document.createElement("p");
+                message.className = "error";
+                message.textContent = result.reason.message;
+
+                panel.append(heading, message);
+                container.appendChild(panel);
+            }
+        });
+
+        // Update summary cards
+        document.getElementById("urgentCount").textContent =
+            reportData["urgent-issues"]?.length ?? "--";
+
+        document.getElementById("developerCount").textContent =
+            reportData["active-developers"]?.length ?? "--";
+
+        document.getElementById("projectCount").textContent =
+            reportData["project-issue-statistics"]?.length ?? "--";
+
+        document.getElementById("solutionCount").textContent =
+            reportData["accepted-solutions"]?.length ?? "--";
+
+        // Update charts
+        if (reportData["issue-details"]) {
+            createSeverityChart(reportData["issue-details"]);
+        }
+
+        if (reportData["developer-workload"]) {
+            createWorkloadChart(reportData["developer-workload"]);
+        }
+    }
+
+    // Verify login before loading reports
+    async function initializeReports() {
+        try {
+            await api("/api/auth/me");
+            await loadReports();
+        } catch (error) {
+            console.error("Could not initialize reports:", error);
+
+            document.getElementById("viewsContainer").textContent =
+                error.message;
+        }
+    }
+
+    initializeReports();
+</script>
+
+</body>
+</html>
