@@ -534,9 +534,18 @@
     function createSeverityChart(rows) {
         if (!applyChartDefaults()) return;
 
+        // view_issue_details has one row per issue *assignment*, so an
+        // issue with several assignees appears more than once. Count
+        // each issue_id once so the totals match the dashboard.
         const counts = {};
+        const seen = new Set();
 
         rows.forEach(row => {
+            if (row.issue_id !== undefined && row.issue_id !== null) {
+                if (seen.has(row.issue_id)) return;
+                seen.add(row.issue_id);
+            }
+
             const severity = row.severity || "Unknown";
             counts[severity] = (counts[severity] || 0) + 1;
         });
