@@ -710,7 +710,7 @@ a:hover { text-decoration: underline; }
 
 .table .primary-cell { color: var(--text-primary); font-weight: 500; }
 
-.table .num { font-variant-numeric: tabular-nums; }
+.table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 .table .actions { width: 1%; white-space: nowrap; text-align: right; }
 
