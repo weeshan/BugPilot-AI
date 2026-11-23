@@ -761,7 +761,7 @@ a:hover { text-decoration: underline; }
     top: calc(100% + 4px);
     right: 0;
     z-index: 30;
-    min-width: 220px;
+    min-width: 240px;
     padding: var(--sp-1) 0;
     background: var(--bg-primary);
     border: 1px solid var(--border-secondary);
@@ -782,6 +782,7 @@ a:hover { text-decoration: underline; }
     color: var(--text-secondary);
     font: 500 var(--text-sm) / var(--lh-sm) var(--font);
     text-align: left;
+    white-space: nowrap;
     cursor: pointer;
 }
 
