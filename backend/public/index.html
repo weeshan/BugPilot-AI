@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,424 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BugPilot AI - Dashboard</title>
 
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/layout.js"></script>
+
   <style>
-    * {
-      box-sizing: border-box;
+    .issue-id {
+      color: var(--text-quaternary);
+      font-variant-numeric: tabular-nums;
     }
 
-    [hidden] {
-      display: none !important;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      padding: 30px;
-      background: #0f172a;
-      color: #f8fafc;
-      font-family: Arial, sans-serif;
-    }
-
-    h1, h2, h3, p {
-      margin-top: 0;
-    }
-
-    h1 {
-      color: #60a5fa;
-      margin-bottom: 8px;
-    }
-
-    h2 {
-      font-size: 22px;
-    }
-
-    p {
-      color: #cbd5e1;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: auto;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-
-    .account {
+    .user-cell {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
+      gap: var(--sp-3);
     }
 
-    .badge {
-      display: inline-block;
-      padding: 7px 12px;
-      border-radius: 20px;
-      background: #1d4ed8;
-      color: white;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    .hero, .panel, .stat {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 14px;
-    }
-
-    .hero {
-      padding: 28px;
-      margin-bottom: 24px;
-    }
-
-    .hero h2 {
-      color: #93c5fd;
-    }
-
-    .nav-btn {
-      display: inline-block;
-      padding: 11px 18px;
-      border-radius: 8px;
-      background: #2563eb;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-
-    .nav-btn:hover {
-      background: #1d4ed8;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat {
-      padding: 22px;
-    }
-
-    .stat .number {
-      font-size: 32px;
-      font-weight: bold;
-      color: #60a5fa;
-      margin-top: 12px;
-    }
-
-    .stat .label {
-      color: #94a3b8;
-      font-size: 14px;
-    }
-
-    .panel {
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    input, select, textarea {
-      padding: 12px;
-      background: #0f172a;
-      color: white;
-      border: 1px solid #475569;
-      border-radius: 8px;
-      font: inherit;
-      max-width: 100%;
-    }
-
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-
-    .controls input {
-      flex: 1;
-      min-width: 180px;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    button {
-      padding: 11px 18px;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      background: #2563eb;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover:not(:disabled) {
-      filter: brightness(1.15);
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    button.danger {
-      background: #dc2626;
-    }
-
-    button.secondary {
-      background: #475569;
-    }
-
-    button.small {
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .field.full {
-      grid-column: 1 / -1;
-    }
-
-    .field label {
-      color: #cbd5e1;
-      font-weight: bold;
-    }
-
-    .form-actions {
-      margin-top: 20px;
-      display: flex;
-      gap: 12px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 14px;
-      text-align: left;
-      border-bottom: 1px solid #334155;
-      vertical-align: middle;
-    }
-
-    th {
-      background: #334155;
-      color: #e2e8f0;
-    }
-
-    tr:hover {
-      background: #283548;
-    }
-
-    td {
-      color: #e2e8f0;
-    }
-
-    td select {
-      min-width: 100px;
-      padding: 8px;
-    }
-
-    .severity {
-      font-weight: bold;
-    }
-
-    .severity.Critical {
-      color: #f87171;
-    }
-
-    .severity.High {
-      color: #fb923c;
-    }
-
-    .severity.Medium {
-      color: #facc15;
-    }
-
-    .severity.Low {
-      color: #4ade80;
-    }
-
-    .notice {
-      padding: 14px;
-      margin-bottom: 20px;
-      background: #1e3a8a;
-      border-radius: 8px;
-      color: white;
-    }
-
-    .notice.error {
-      background: #7f1d1d;
-    }
-
-    .muted {
-      color: #94a3b8;
-    }
-
-    #message, #usersMessage {
-      color: #93c5fd;
-    }
-
-    @media (max-width: 760px) {
-      body {
-        padding: 14px;
-      }
-
-      .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .panel {
-        padding: 16px;
-      }
-
-      .hero {
-        padding: 20px;
-      }
+    .users-table .select {
+      width: auto;
+      min-width: 110px;
     }
   </style>
 </head>
 
 <body>
-<div class="container">
 
-  <!-- HEADER -->
-  <header class="topbar">
-    <div>
-      <h1>🐛 BugPilot AI</h1>
-      <p>Software Bug Tracking Dashboard</p>
-    </div>
-
-    <div class="account">
-      <span id="currentUser">Checking session...</span>
-      <span id="rolePill" class="badge" hidden></span>
-      <a href="/reports" id="reportsLink" class="nav-btn" hidden>
-          Reports
-      </a>
-      <button id="logoutBtn" class="danger">
-        Logout
-      </button>
-    </div>
-  </header>
-
-  <!-- ROLE-SPECIFIC DASHBOARD -->
-  <section class="hero">
-    <h2 id="dashboardTitle">Loading dashboard...</h2>
-    <p id="dashboardDescription">
-      Verifying your account permissions.
-    </p>
-  </section>
+<main id="app-content" class="pre-shell">
 
   <div id="notice" class="notice" role="status"
        aria-live="polite" hidden></div>
 
   <!-- ISSUE STATISTICS -->
-  <section class="stats">
-    <div class="stat">
-      <div class="label">Total Issues</div>
-      <div id="totalIssues" class="number">0</div>
+  <section class="stat-grid" aria-label="Issue statistics">
+    <div class="card stat-card">
+      <span class="icon-box" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h10M7 10h10M7 15h10M3 5h.01M3 10h.01M3 15h.01"/></svg>
+      </span>
+      <div>
+        <div class="stat-label">Total issues</div>
+        <div class="stat-row"><span id="totalIssues" class="stat-value">0</span></div>
+      </div>
     </div>
 
-    <div class="stat">
-      <div class="label">Open Issues</div>
-      <div id="openIssues" class="number">0</div>
+    <div class="card stat-card">
+      <span class="icon-box" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2.5"/></svg>
+      </span>
+      <div>
+        <div class="stat-label">Open issues</div>
+        <div class="stat-row"><span id="openIssues" class="stat-value">0</span></div>
+      </div>
     </div>
 
-    <div class="stat">
-      <div class="label">Critical Issues</div>
-      <div id="criticalIssues" class="number">0</div>
+    <div class="card stat-card">
+      <span class="icon-box" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 3.4 1.9 15a1.6 1.6 0 0 0 1.4 2.4h13.4a1.6 1.6 0 0 0 1.4-2.4L11.4 3.4a1.6 1.6 0 0 0-2.8 0ZM10 7.5v3.3M10 14.2h.01"/></svg>
+      </span>
+      <div>
+        <div class="stat-label">Critical issues</div>
+        <div class="stat-row"><span id="criticalIssues" class="stat-value">0</span></div>
+      </div>
     </div>
 
-    <div class="stat">
-      <div class="label">Resolved / Closed</div>
-      <div id="resolvedIssues" class="number">0</div>
+    <div class="card stat-card">
+      <span class="icon-box" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="m6.7 10 2.2 2.2 4.4-4.4"/></svg>
+      </span>
+      <div>
+        <div class="stat-label">Resolved / closed</div>
+        <div class="stat-row"><span id="resolvedIssues" class="stat-value">0</span></div>
+      </div>
     </div>
   </section>
 
   <!-- ISSUE MANAGEMENT -->
-  <section class="panel">
-    <div class="section-header">
-      <h2>Issue Management</h2>
+  <section class="card table-card" id="issuesPanel" aria-labelledby="issuesHeading">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title" id="issuesHeading">Issues</h2>
+        <p class="card-sub">Search and filter every reported issue.</p>
+      </div>
 
-      <button id="newIssueBtn" hidden>
-        + Create Issue
-      </button>
+      <div class="filter-bar">
+        <label class="search">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="m17 17-3.9-3.9"/></svg>
+          <input
+            class="input"
+            type="text"
+            id="search"
+            placeholder="Search bugs or projects"
+            aria-label="Search issues"
+          >
+        </label>
+
+        <select id="severity" class="select input-sm" aria-label="Filter severity">
+          <option value="">All severities</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+          <option value="Critical">Critical</option>
+        </select>
+
+        <select id="status" class="select input-sm" aria-label="Filter status">
+          <option value="">All statuses</option>
+          <option value="Open">Open</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Closed">Closed</option>
+        </select>
+
+        <button id="newIssueBtn" class="btn btn-primary" type="button" hidden>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" aria-hidden="true"><path d="M10 4.2v11.6M4.2 10h11.6"/></svg>
+          Create issue
+        </button>
+      </div>
     </div>
 
-    <div class="controls">
-      <input
-        type="text"
-        id="search"
-        placeholder="Search bugs or projects..."
-        aria-label="Search issues"
-      >
-
-      <select id="severity" aria-label="Filter severity">
-        <option value="">All Severities</option>
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-        <option value="Critical">Critical</option>
-      </select>
-
-      <select id="status" aria-label="Filter status">
-        <option value="">All Statuses</option>
-        <option value="Open">Open</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Resolved">Resolved</option>
-        <option value="Closed">Closed</option>
-      </select>
-    </div>
-
-    <p id="message">Loading issues...</p>
-
-    <div class="table-container">
-      <table>
+    <div class="table-wrap">
+      <table class="table">
         <thead>
           <tr>
             <th>ID</th>
@@ -431,118 +129,144 @@
             <th>Project</th>
             <th>Severity</th>
             <th>Status</th>
-            <th id="actionsHeader" hidden>Actions</th>
+            <th>Reported</th>
+            <th id="actionsHeader" class="actions" hidden>
+              <span class="sr-only">Actions</span>
+            </th>
           </tr>
         </thead>
 
         <tbody id="issuesTable"></tbody>
       </table>
-    </div>
-  </section>
 
-  <!-- ADMIN AND USER: CREATE ISSUE -->
-  <section id="createPanel" class="panel" hidden>
-    <div class="section-header">
-      <h2>Create New Issue</h2>
-
-      <button id="closeCreateBtn" class="secondary">
-        Close
-      </button>
+      <p id="issuesEmpty" class="empty-state" hidden>
+        No issues match your search and filters.
+      </p>
     </div>
 
-    <form id="createIssueForm">
-      <div class="form-grid">
-
-        <div class="field">
-          <label for="projectId">Project</label>
-          <select id="projectId" required>
-            <option value="">Select a project</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="reporterId">Reporter (Developer)</label>
-          <select id="reporterId" required>
-            <option value="">Select a developer</option>
-          </select>
-        </div>
-
-        <div class="field full">
-          <label for="issueTitle">Issue Title</label>
-          <input
-            type="text"
-            id="issueTitle"
-            maxlength="180"
-            placeholder="Describe the bug briefly"
-            required
-          >
-        </div>
-
-        <div class="field full">
-          <label for="issueDescription">Description</label>
-          <textarea
-            id="issueDescription"
-            maxlength="10000"
-            placeholder="What happened? How can it be reproduced?"
-            required
-          ></textarea>
-        </div>
-
-        <div class="field">
-          <label for="issueSeverity">Severity</label>
-          <select id="issueSeverity" required>
-            <option value="Low">Low</option>
-            <option value="Medium" selected>Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-          </select>
-        </div>
-
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" id="submitIssueBtn">
-          Save Issue
-        </button>
-      </div>
-    </form>
+    <div class="table-footer">
+      <p id="message">Loading issues...</p>
+    </div>
   </section>
 
   <!-- ADMIN ONLY: USER MANAGEMENT -->
-  <section id="adminPanel" class="panel" hidden>
-    <div class="section-header">
+  <section id="adminPanel" class="card table-card" aria-labelledby="usersHeading" hidden>
+    <div class="card-header">
       <div>
-        <h2>Administrator — User Management</h2>
-        <p class="muted">
+        <h2 class="card-title" id="usersHeading">User management</h2>
+        <p class="card-sub">
           View accounts, change roles, and enable or disable users.
         </p>
       </div>
 
-      <button id="refreshUsersBtn" class="secondary">
-        Refresh Users
+      <button id="refreshUsersBtn" class="btn" type="button">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8.3A7.5 7.5 0 0 1 16 5.5M17.5 11.7A7.5 7.5 0 0 1 4 14.5M16.5 2v3.8h-3.8M3.5 18v-3.8h3.8"/></svg>
+        Refresh users
       </button>
     </div>
 
-    <p id="usersMessage">Loading users...</p>
-
-    <div class="table-container">
-      <table>
+    <div class="table-wrap">
+      <table class="table compact users-table">
         <thead>
           <tr>
             <th>User ID</th>
-            <th>Username</th>
+            <th>User</th>
             <th>Email</th>
             <th>Role</th>
             <th>Active</th>
-            <th>Action</th>
+            <th class="actions"><span class="sr-only">Action</span></th>
           </tr>
         </thead>
 
         <tbody id="usersTable"></tbody>
       </table>
     </div>
+
+    <div class="table-footer">
+      <p id="usersMessage">Loading users...</p>
+    </div>
   </section>
 
+</main>
+
+<!-- ADMIN AND USER: CREATE ISSUE (modal) -->
+<div id="createPanel" class="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="createHeading">
+
+    <form id="createIssueForm" class="stack" style="gap:0; min-height:0">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="createHeading">Create issue</h2>
+          <p class="tertiary">Report a new bug against a project.</p>
+        </div>
+
+        <button id="closeCreateBtn" class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Close">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-grid">
+
+          <div class="field">
+            <label class="label" for="projectId">Project</label>
+            <select id="projectId" class="select" required>
+              <option value="">Select a project</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="label" for="reporterId">Reporter (developer)</label>
+            <select id="reporterId" class="select" required>
+              <option value="">Select a developer</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label class="label" for="issueTitle">Title</label>
+            <input
+              class="input"
+              type="text"
+              id="issueTitle"
+              maxlength="180"
+              placeholder="Describe the bug briefly"
+              required
+            >
+          </div>
+
+          <div class="field full">
+            <label class="label" for="issueDescription">Description</label>
+            <textarea
+              class="textarea"
+              id="issueDescription"
+              maxlength="10000"
+              placeholder="What happened? How can it be reproduced?"
+              required
+            ></textarea>
+          </div>
+
+          <div class="field">
+            <label class="label" for="issueSeverity">Severity</label>
+            <select id="issueSeverity" class="select" required>
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close-create>Cancel</button>
+        <button type="submit" id="submitIssueBtn" class="btn btn-primary">
+          Save issue
+        </button>
+      </div>
+    </form>
+
+  </div>
 </div>
 
 <script>
@@ -588,7 +312,7 @@
     const notice = $("notice");
     notice.hidden = false;
     notice.textContent = message;
-    notice.className = error ? "notice error" : "notice";
+    notice.className = error ? "notice error" : "notice success";
   }
 
   function addCell(row, value) {
@@ -596,6 +320,45 @@
     cell.textContent = value ?? "";
     row.appendChild(cell);
     return cell;
+  }
+
+  // Lower-case, hyphenated class suffix ("In Progress" -> "in-progress").
+  function slug(value) {
+    return String(value ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-");
+  }
+
+  function severityBadge(severity) {
+    const badge = document.createElement("span");
+    badge.className = "badge sev sev-" + slug(severity);
+    badge.textContent = severity ?? "";
+    return badge;
+  }
+
+  function statusBadge(status) {
+    const badge = document.createElement("span");
+    const dot = document.createElement("span");
+    badge.className = "badge status-" + slug(status);
+    dot.className = "dot";
+    badge.append(dot, document.createTextNode(status ?? ""));
+    return badge;
+  }
+
+  function projectChip(name) {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = name ?? "";
+    return chip;
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
   }
 
   // ========================================
@@ -627,37 +390,37 @@
         return;
       }
 
-      $("currentUser").textContent = currentUser.username;
-      $("rolePill").textContent = currentUser.role.toUpperCase();
-      $("rolePill").hidden = false;
+      const titles = {
+        admin: "Admin dashboard",
+        user: "User dashboard",
+        guest: "Guest dashboard"
+      };
+
+      const descriptions = {
+        admin: "Welcome, " + currentUser.username +
+          ". You can manage users, create issues, and delete issues.",
+        user: "Welcome, " + currentUser.username +
+          ". You can view, search, and create bug reports.",
+        guest: "Read-only access. You can browse issues, " +
+          "but you cannot create or delete them."
+      };
+
+      // Render the shared shell (sidebar, top bar, user menu).
+      await BugPilotLayout.mount({
+        user: currentUser,
+        active: "dashboard",
+        title: titles[currentUser.role],
+        subtitle: descriptions[currentUser.role],
+        breadcrumb: ["Dashboard"]
+      });
 
       if (currentUser.role === "admin") {
-        $("dashboardTitle").textContent = "Admin Dashboard";
-        $("dashboardDescription").textContent =
-          "Welcome, " + currentUser.username +
-          ". You can manage users, create issues, and delete issues.";
-
         $("adminPanel").hidden = false;
         $("actionsHeader").hidden = false;
       }
 
-      if (currentUser.role === "user") {
-        $("dashboardTitle").textContent = "User Dashboard";
-        $("dashboardDescription").textContent =
-          "Welcome, " + currentUser.username +
-          ". You can view, search, and create bug reports.";
-      }
-
-      if (currentUser.role === "guest") {
-        $("dashboardTitle").textContent = "Guest Dashboard";
-        $("dashboardDescription").textContent =
-          "Read-only access. You can browse issues, " +
-          "but you cannot create or delete them.";
-      }
-
       if (["admin", "user"].includes(currentUser.role)) {
         $("newIssueBtn").hidden = false;
-        $("reportsLink").hidden = false;
       }
 
       await loadIssues();
@@ -671,6 +434,7 @@
       }
 
     } catch (error) {
+      $("app-content")?.classList.remove("pre-shell");
       showNotice(error.message, true);
     }
   }
@@ -724,22 +488,26 @@
     for (const issue of issues) {
       const row = document.createElement("tr");
 
-      addCell(row, issue.issue_id);
-      addCell(row, issue.title);
-      addCell(row, issue.project_name);
-
-      const severityCell = addCell(row, issue.severity);
-      severityCell.className = "severity " + issue.severity;
-
-      addCell(row, issue.status);
+      addCell(row, "#" + issue.issue_id).className = "issue-id";
+      addCell(row, issue.title).className = "primary-cell";
+      addCell(row, "").appendChild(projectChip(issue.project_name));
+      addCell(row, "").appendChild(severityBadge(issue.severity));
+      addCell(row, "").appendChild(statusBadge(issue.status));
+      addCell(row, formatDate(issue.reported_on)).className = "num";
 
       // Only admins see delete controls.
       if (currentUser.role === "admin") {
         const cell = document.createElement("td");
         const button = document.createElement("button");
 
+        cell.className = "actions";
+        button.type = "button";
         button.textContent = "Delete";
-        button.className = "danger small";
+        button.className = "btn btn-danger btn-sm";
+        button.setAttribute(
+          "aria-label",
+          `Delete issue #${issue.issue_id}`
+        );
 
         button.addEventListener("click", () => {
           deleteIssue(issue.issue_id, button);
@@ -751,6 +519,8 @@
 
       table.appendChild(row);
     }
+
+    $("issuesEmpty").hidden = issues.length > 0 || allIssues.length === 0;
 
     $("message").textContent =
       `Showing ${issues.length} of ${allIssues.length} issues`;
@@ -846,6 +616,15 @@
   // 8. CREATE ISSUE
   // ========================================
 
+  function openCreatePanel() {
+    $("createPanel").hidden = false;
+    $("projectId").focus();
+  }
+
+  function closeCreatePanel() {
+    $("createPanel").hidden = true;
+  }
+
   async function createIssue(event) {
     event.preventDefault();
 
@@ -874,7 +653,7 @@
       });
 
       $("createIssueForm").reset();
-      $("createPanel").hidden = true;
+      closeCreatePanel();
 
       showNotice("Issue created successfully!");
       await loadIssues();
@@ -939,12 +718,30 @@
       for (const account of users) {
         const row = document.createElement("tr");
 
-        addCell(row, account.user_id);
-        addCell(row, account.username);
+        addCell(row, account.user_id).className = "issue-id";
+
+        const userCell = document.createElement("td");
+        const userWrap = document.createElement("div");
+        const userName = document.createElement("span");
+        userWrap.className = "user-cell";
+        userName.className = "primary-cell";
+        userName.textContent = account.username;
+        userWrap.append(
+          BugPilotLayout.avatar(account.username, "sm"),
+          userName
+        );
+        userCell.appendChild(userWrap);
+        row.appendChild(userCell);
+
         addCell(row, account.email);
 
         const roleCell = document.createElement("td");
         const roleSelect = document.createElement("select");
+        roleSelect.className = "select input-sm";
+        roleSelect.setAttribute(
+          "aria-label",
+          `Role for ${account.username}`
+        );
 
         for (const role of ["admin", "user"]) {
           const option = document.createElement("option");
@@ -961,6 +758,7 @@
         const activeCheckbox = document.createElement("input");
 
         activeCheckbox.type = "checkbox";
+        activeCheckbox.className = "checkbox";
         activeCheckbox.checked = Boolean(account.is_active);
         activeCheckbox.setAttribute(
           "aria-label",
@@ -973,8 +771,10 @@
         const actionCell = document.createElement("td");
         const saveButton = document.createElement("button");
 
+        actionCell.className = "actions";
+        saveButton.type = "button";
         saveButton.textContent = "Save";
-        saveButton.className = "small";
+        saveButton.className = "btn btn-sm";
 
         // Prevent administrators editing their own account.
         const isSelf =
@@ -1033,46 +833,19 @@
   }
 
   // ========================================
-  // 11. LOGOUT
-  // ========================================
-
-  async function logout() {
-    const button = $("logoutBtn");
-    button.disabled = true;
-
-    try {
-      await api("/api/auth/logout", {
-        method: "POST"
-      });
-
-      window.location.replace("/login");
-
-    } catch (error) {
-      showNotice("Logout failed: " + error.message, true);
-      button.disabled = false;
-    }
-  }
-
-  // ========================================
-  // 12. EVENT LISTENERS
+  // 11. EVENT LISTENERS
+  // (Logout is handled by the shared shell in layout.js.)
   // ========================================
 
   $("search").addEventListener("input", filterIssues);
   $("severity").addEventListener("change", filterIssues);
   $("status").addEventListener("change", filterIssues);
 
-  $("logoutBtn").addEventListener("click", logout);
+  $("newIssueBtn").addEventListener("click", openCreatePanel);
+  $("closeCreateBtn").addEventListener("click", closeCreatePanel);
 
-  $("newIssueBtn").addEventListener("click", () => {
-    $("createPanel").hidden = false;
-    $("createPanel").scrollIntoView({
-      behavior: "smooth"
-    });
-  });
-
-  $("closeCreateBtn").addEventListener("click", () => {
-    $("createPanel").hidden = true;
-  });
+  document.querySelector("[data-close-create]")
+    .addEventListener("click", closeCreatePanel);
 
   $("createIssueForm").addEventListener(
     "submit",
@@ -1085,7 +858,7 @@
   );
 
   // ========================================
-  // 13. START APPLICATION
+  // 12. START APPLICATION
   // ========================================
 
   initializeDashboard();
