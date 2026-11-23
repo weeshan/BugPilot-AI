@@ -381,7 +381,7 @@
 <div id="createPanel" class="overlay" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="createHeading">
 
-    <form id="createIssueForm" class="stack" style="gap:0; min-height:0">
+    <form id="createIssueForm" class="stack" style="gap:0; min-height:0" novalidate>
       <div class="modal-header">
         <div>
           <h2 class="modal-title" id="createHeading">Create issue</h2>
@@ -394,20 +394,27 @@
       </div>
 
       <div class="modal-body">
+        <div id="createError" class="notice error" role="alert" hidden
+             style="margin-bottom: var(--sp-4)"></div>
+
         <div class="form-grid">
 
           <div class="field">
             <label class="label" for="projectId">Project</label>
-            <select id="projectId" class="select" required>
+            <select id="projectId" class="select" required
+                    aria-describedby="projectIdError">
               <option value="">Select a project</option>
             </select>
+            <p class="error-text" id="projectIdError" hidden></p>
           </div>
 
           <div class="field">
             <label class="label" for="reporterId">Reporter (developer)</label>
-            <select id="reporterId" class="select" required>
+            <select id="reporterId" class="select" required
+                    aria-describedby="reporterIdError">
               <option value="">Select a developer</option>
             </select>
+            <p class="error-text" id="reporterIdError" hidden></p>
           </div>
 
           <div class="field full">
@@ -418,8 +425,14 @@
               id="issueTitle"
               maxlength="180"
               placeholder="Describe the bug briefly"
+              aria-describedby="issueTitleError issueTitleCount"
               required
             >
+            <div class="hint-row">
+              <p class="error-text" id="issueTitleError" hidden></p>
+              <span class="spacer"></span>
+              <span class="counter" id="issueTitleCount">0 / 180</span>
+            </div>
           </div>
 
           <div class="field full">
@@ -429,18 +442,26 @@
               id="issueDescription"
               maxlength="10000"
               placeholder="What happened? How can it be reproduced?"
+              aria-describedby="issueDescriptionError issueDescriptionCount"
               required
             ></textarea>
+            <div class="hint-row">
+              <p class="error-text" id="issueDescriptionError" hidden></p>
+              <span class="spacer"></span>
+              <span class="counter" id="issueDescriptionCount">0 / 10000</span>
+            </div>
           </div>
 
           <div class="field">
             <label class="label" for="issueSeverity">Severity</label>
-            <select id="issueSeverity" class="select" required>
+            <select id="issueSeverity" class="select" required
+                    aria-describedby="issueSeverityError">
               <option value="Low">Low</option>
               <option value="Medium" selected>Medium</option>
               <option value="High">High</option>
               <option value="Critical">Critical</option>
             </select>
+            <p class="error-text" id="issueSeverityError" hidden></p>
           </div>
 
         </div>
@@ -1117,13 +1138,122 @@
   // 8. CREATE ISSUE
   // ========================================
 
+  // Client-side rules mirror POST /api/issues in routes/issues.js.
+  const ISSUE_RULES = {
+    titleMax: 180,
+    descriptionMax: 10000,
+    severities: ["Low", "Medium", "High", "Critical"]
+  };
+
+  const ISSUE_FIELDS = [
+    "projectId", "reporterId", "issueTitle",
+    "issueDescription", "issueSeverity"
+  ];
+
+  function setFieldError(id, message) {
+    const field = $(id);
+    const error = $(id + "Error");
+
+    if (message) {
+      field.setAttribute("aria-invalid", "true");
+      error.textContent = message;
+      error.hidden = false;
+    } else {
+      field.removeAttribute("aria-invalid");
+      error.textContent = "";
+      error.hidden = true;
+    }
+  }
+
+  function clearCreateErrors() {
+    ISSUE_FIELDS.forEach(id => setFieldError(id, ""));
+    $("createError").hidden = true;
+    $("createError").textContent = "";
+  }
+
+  function updateCounter(inputId, max) {
+    const length = $(inputId).value.trim().length;
+    const counter = $(inputId + "Count");
+    counter.textContent = `${length} / ${max}`;
+    counter.classList.toggle("over", length > max);
+  }
+
+  function updateCounters() {
+    updateCounter("issueTitle", ISSUE_RULES.titleMax);
+    updateCounter("issueDescription", ISSUE_RULES.descriptionMax);
+  }
+
+  function isPositiveId(value) {
+    const number = Number(value);
+    return value !== "" &&
+      Number.isSafeInteger(number) &&
+      number > 0 &&
+      number <= 2147483647;
+  }
+
+  // Returns the request payload, or null after marking invalid fields.
+  function validateIssueForm() {
+    const projectId = $("projectId").value;
+    const reporterId = $("reporterId").value;
+    const title = $("issueTitle").value.trim();
+    const description = $("issueDescription").value.trim();
+    const severity = $("issueSeverity").value;
+
+    const errors = {
+      projectId: isPositiveId(projectId)
+        ? "" : "Select a project.",
+      reporterId: isPositiveId(reporterId)
+        ? "" : "Select the developer reporting this issue.",
+      issueTitle:
+        !title ? "Enter a title." :
+        title.length > ISSUE_RULES.titleMax
+          ? `Title must be ${ISSUE_RULES.titleMax} characters or fewer.` : "",
+      issueDescription:
+        !description ? "Enter a description." :
+        description.length > ISSUE_RULES.descriptionMax
+          ? `Description must be ${ISSUE_RULES.descriptionMax} characters or fewer.` : "",
+      issueSeverity: ISSUE_RULES.severities.includes(severity)
+        ? "" : "Choose Low, Medium, High or Critical."
+    };
+
+    let firstInvalid = null;
+
+    for (const id of ISSUE_FIELDS) {
+      setFieldError(id, errors[id]);
+      if (errors[id] && !firstInvalid) firstInvalid = id;
+    }
+
+    if (firstInvalid) {
+      $(firstInvalid).focus();
+      return null;
+    }
+
+    return {
+      project_id: Number(projectId),
+      reporter_id: Number(reporterId),
+      title,
+      description,
+      severity
+    };
+  }
+
+  let createOpener = null;
+
   function openCreatePanel() {
+    createOpener = document.activeElement;
+    clearCreateErrors();
+    updateCounters();
     $("createPanel").hidden = false;
     $("projectId").focus();
   }
 
   function closeCreatePanel() {
     $("createPanel").hidden = true;
+    clearCreateErrors();
+
+    if (createOpener && document.contains(createOpener)) {
+      createOpener.focus();
+    }
   }
 
   async function createIssue(event) {
@@ -1133,16 +1263,16 @@
       return;
     }
 
+    $("createError").hidden = true;
+
+    const payload = validateIssueForm();
+
+    if (!payload) {
+      return;
+    }
+
     const button = $("submitIssueBtn");
     button.disabled = true;
-
-    const payload = {
-      project_id: Number($("projectId").value),
-      reporter_id: Number($("reporterId").value),
-      title: $("issueTitle").value.trim(),
-      description: $("issueDescription").value.trim(),
-      severity: $("issueSeverity").value
-    };
 
     try {
       await api("/api/issues", {
@@ -1160,10 +1290,10 @@
       await loadIssues();
 
     } catch (error) {
-      showNotice(
-        "Unable to create issue: " + error.message,
-        true
-      );
+      // Show the server's message inside the open modal.
+      $("createError").textContent =
+        "Unable to create issue: " + error.message;
+      $("createError").hidden = false;
     } finally {
       button.disabled = false;
     }
@@ -1347,6 +1477,29 @@
 
   document.querySelector("[data-close-create]")
     .addEventListener("click", closeCreatePanel);
+
+  // Close on backdrop click or Escape.
+  $("createPanel").addEventListener("click", event => {
+    if (event.target === $("createPanel")) closeCreatePanel();
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !$("createPanel").hidden) {
+      closeCreatePanel();
+    }
+  });
+
+  // Live counters; clear a field's error as soon as it is edited.
+  for (const id of ISSUE_FIELDS) {
+    const eventName = $(id).tagName === "SELECT" ? "change" : "input";
+
+    $(id).addEventListener(eventName, () => {
+      setFieldError(id, "");
+      if (id === "issueTitle" || id === "issueDescription") {
+        updateCounters();
+      }
+    });
+  }
 
   $("createIssueForm").addEventListener(
     "submit",
