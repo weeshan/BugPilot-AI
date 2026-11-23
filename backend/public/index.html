@@ -6,6 +6,7 @@
   <title>BugPilot AI - Dashboard</title>
 
   <link rel="stylesheet" href="/css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="/js/layout.js"></script>
 
   <style>
@@ -23,6 +24,109 @@
     .users-table .select {
       width: auto;
       min-width: 110px;
+    }
+
+    /* Issues by status: horizontal progress rows */
+    .progress-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-5);
+    }
+
+    .progress-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr) 72px;
+      align-items: center;
+      gap: var(--sp-4);
+    }
+
+    .progress-row .name {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .progress-track {
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--bg-active);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+    }
+
+    .progress-row .value {
+      text-align: right;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Issues by project: doughnut + legend */
+    .pie-wrap {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-6);
+    }
+
+    .pie-wrap .chart-box {
+      width: 180px;
+      height: 180px;
+      flex: none;
+    }
+
+    .legend {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    .legend li {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    .legend .swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      flex: none;
+    }
+
+    .legend .name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-secondary);
+    }
+
+    .legend .count {
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 640px) {
+      .pie-wrap {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pie-wrap .chart-box {
+        margin: 0 auto;
+      }
+
+      .progress-row {
+        grid-template-columns: 96px minmax(0, 1fr) 56px;
+      }
     }
   </style>
 </head>
@@ -74,6 +178,90 @@
         <div class="stat-label">Resolved / closed</div>
         <div class="stat-row"><span id="resolvedIssues" class="stat-value">0</span></div>
       </div>
+    </div>
+  </section>
+
+  <!-- CHARTS (all derived from GET /api/issues) -->
+  <section class="grid-3-2">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Issues by status</h2>
+          <p class="card-sub">Share of all reported issues.</p>
+        </div>
+      </div>
+      <div id="statusBars" class="progress-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Issues by project</h2>
+          <p class="card-sub">Where the issues are reported.</p>
+        </div>
+      </div>
+      <div class="pie-wrap">
+        <div class="chart-box">
+          <canvas id="projectChart" role="img" aria-label="Issues by project"></canvas>
+        </div>
+        <ul id="projectLegend" class="legend"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid-3-2">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Issues reported</h2>
+          <p class="card-sub" id="trendRange">Daily count.</p>
+        </div>
+      </div>
+      <div class="chart-box">
+        <canvas id="trendChart" role="img" aria-label="Issues reported per day"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Issues by severity</h2>
+          <p class="card-sub">All issues, by severity level.</p>
+        </div>
+      </div>
+      <div class="chart-box">
+        <canvas id="severityChart" role="img" aria-label="Issues by severity"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOP CRITICAL ISSUES -->
+  <section class="card table-card" aria-labelledby="topCriticalHeading">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title" id="topCriticalHeading">Top critical issues</h2>
+        <p class="card-sub">Unresolved Critical and High severity issues, newest first.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table compact">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Issue</th>
+            <th>Project</th>
+            <th>Reported</th>
+            <th>Status</th>
+            <th>Severity</th>
+          </tr>
+        </thead>
+        <tbody id="topCriticalTable"></tbody>
+      </table>
+
+      <p id="topCriticalEmpty" class="empty-state" hidden>
+        No unresolved Critical or High severity issues.
+      </p>
     </div>
   </section>
 
@@ -475,6 +663,319 @@
     $("resolvedIssues").textContent = allIssues.filter(
       issue => ["Resolved", "Closed"].includes(issue.status)
     ).length;
+
+    renderCharts();
+    renderTopCritical();
+  }
+
+  // ========================================
+  // 4b. CHARTS AND TOP CRITICAL ISSUES
+  // ========================================
+
+  const charts = {};
+
+  const token = name =>
+    getComputedStyle(document.documentElement)
+      .getPropertyValue(name).trim();
+
+  const STATUSES = ["Open", "In Progress", "Resolved", "Closed"];
+  const SEVERITIES = ["Low", "Medium", "High", "Critical"];
+
+  const statusColor = status => token({
+    "Open": "--brand-300",
+    "In Progress": "--sev-high",
+    "Resolved": "--success-500",
+    "Closed": "--text-quaternary"
+  }[status] || "--text-axis");
+
+  const severityColor = severity =>
+    token("--sev-" + slug(severity)) || token("--text-axis");
+
+  const PROJECT_TOKENS = [
+    "--brand-300", "--sev-medium", "--sev-low", "--sev-high",
+    "--brand-600", "--sev-critical", "--text-quaternary"
+  ];
+
+  function countBy(items, key) {
+    const counts = new Map();
+    for (const item of items) {
+      const value = item[key] ?? "Unknown";
+      counts.set(value, (counts.get(value) || 0) + 1);
+    }
+    return counts;
+  }
+
+  // Local calendar day key, e.g. "2026-11-16".
+  function dayKey(date) {
+    return [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, "0"),
+      String(date.getDate()).padStart(2, "0")
+    ].join("-");
+  }
+
+  function drawChart(id, config) {
+    if (!window.Chart) return; // CDN unavailable: tables still work.
+
+    if (charts[id]) charts[id].destroy();
+
+    charts[id] = new Chart($(id), config);
+  }
+
+  function renderCharts() {
+    const total = allIssues.length;
+
+    // ---- Issues by status (progress rows)
+    const statusCounts = countBy(allIssues, "status");
+    const bars = $("statusBars");
+    bars.replaceChildren();
+
+    for (const status of STATUSES) {
+      const count = statusCounts.get(status) || 0;
+      const percent = total ? Math.round((count / total) * 100) : 0;
+
+      const row = document.createElement("div");
+      const name = document.createElement("span");
+      const track = document.createElement("div");
+      const fill = document.createElement("div");
+      const value = document.createElement("span");
+
+      row.className = "progress-row";
+      name.className = "name";
+      track.className = "progress-track";
+      fill.className = "progress-fill";
+      value.className = "value";
+
+      name.textContent = status;
+      fill.style.width = percent + "%";
+      fill.style.background = statusColor(status);
+      value.textContent = `${count} · ${percent}%`;
+
+      track.setAttribute("role", "progressbar");
+      track.setAttribute("aria-label", status);
+      track.setAttribute("aria-valuenow", String(percent));
+      track.setAttribute("aria-valuemin", "0");
+      track.setAttribute("aria-valuemax", "100");
+
+      track.appendChild(fill);
+      row.append(name, track, value);
+      bars.appendChild(row);
+    }
+
+    if (!window.Chart) return;
+
+    Chart.defaults.color = token("--text-tertiary");
+    Chart.defaults.font.family = token("--font");
+    Chart.defaults.borderColor = token("--border-card");
+
+    // ---- Issues by project (doughnut + legend)
+    const projects = [...countBy(allIssues, "project_name")]
+      .sort((a, b) => b[1] - a[1]);
+
+    const projectColors = projects.map((_, index) =>
+      token(PROJECT_TOKENS[index % PROJECT_TOKENS.length])
+    );
+
+    drawChart("projectChart", {
+      type: "doughnut",
+      data: {
+        labels: projects.map(([name]) => name),
+        datasets: [{
+          data: projects.map(([, count]) => count),
+          backgroundColor: projectColors,
+          borderColor: token("--bg-primary"),
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "62%",
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    const legend = $("projectLegend");
+    legend.replaceChildren();
+
+    projects.forEach(([name, count], index) => {
+      const item = document.createElement("li");
+      const swatch = document.createElement("span");
+      const label = document.createElement("span");
+      const value = document.createElement("span");
+
+      swatch.className = "swatch";
+      swatch.style.background = projectColors[index];
+      label.className = "name";
+      label.textContent = name;
+      value.className = "count";
+      value.textContent = count;
+
+      item.append(swatch, label, value);
+      legend.appendChild(item);
+    });
+
+    // ---- Issues reported per day (last 14 days of activity)
+    const dates = allIssues
+      .map(issue => new Date(issue.reported_on))
+      .filter(date => !Number.isNaN(date.getTime()));
+
+    const latest = dates.length
+      ? new Date(Math.max(...dates))
+      : new Date();
+
+    const days = [];
+    for (let offset = 13; offset >= 0; offset--) {
+      const day = new Date(latest);
+      day.setDate(latest.getDate() - offset);
+      days.push(day);
+    }
+
+    const reported = new Map(days.map(day => [dayKey(day), 0]));
+    const urgent = new Map(days.map(day => [dayKey(day), 0]));
+
+    for (const issue of allIssues) {
+      const date = new Date(issue.reported_on);
+      if (Number.isNaN(date.getTime())) continue;
+
+      const key = dayKey(date);
+      if (!reported.has(key)) continue;
+
+      reported.set(key, reported.get(key) + 1);
+
+      if (["High", "Critical"].includes(issue.severity)) {
+        urgent.set(key, urgent.get(key) + 1);
+      }
+    }
+
+    const shortDate = day => day.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric"
+    });
+
+    $("trendRange").textContent =
+      `Daily count, ${shortDate(days[0])} – ${shortDate(days[13])}.`;
+
+    drawChart("trendChart", {
+      type: "line",
+      data: {
+        labels: days.map(shortDate),
+        datasets: [
+          {
+            label: "All issues",
+            data: [...reported.values()],
+            borderColor: token("--brand-300"),
+            backgroundColor: token("--brand-300"),
+            borderWidth: 2,
+            pointRadius: 0,
+            cubicInterpolationMode: "monotone"
+          },
+          {
+            label: "High and Critical",
+            data: [...urgent.values()],
+            borderColor: token("--brand-600"),
+            backgroundColor: token("--brand-600"),
+            borderWidth: 2,
+            borderDash: [2, 4],
+            pointRadius: 0,
+            cubicInterpolationMode: "monotone"
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: {
+            position: "top",
+            align: "end",
+            labels: {
+              boxWidth: 8,
+              boxHeight: 8,
+              usePointStyle: true,
+              pointStyle: "circle"
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: { color: token("--text-axis"), maxRotation: 0, autoSkipPadding: 12 }
+          },
+          y: {
+            beginAtZero: true,
+            suggestedMax: Math.max(1, ...reported.values()) + 1,
+            border: { display: false },
+            ticks: { precision: 0, color: token("--text-axis") }
+          }
+        }
+      }
+    });
+
+    // ---- Issues by severity (bars)
+    const severityCounts = countBy(allIssues, "severity");
+
+    drawChart("severityChart", {
+      type: "bar",
+      data: {
+        labels: SEVERITIES,
+        datasets: [{
+          label: "Issues",
+          data: SEVERITIES.map(level => severityCounts.get(level) || 0),
+          backgroundColor: SEVERITIES.map(severityColor),
+          borderRadius: 6,
+          maxBarThickness: 32
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, border: { display: false } },
+          y: {
+            beginAtZero: true,
+            border: { display: false },
+            ticks: { precision: 0, color: token("--text-axis") }
+          }
+        }
+      }
+    });
+  }
+
+  function renderTopCritical() {
+    const rank = { Critical: 0, High: 1 };
+
+    const top = allIssues
+      .filter(issue =>
+        issue.severity in rank &&
+        !["Resolved", "Closed"].includes(issue.status)
+      )
+      .sort((a, b) =>
+        rank[a.severity] - rank[b.severity] ||
+        new Date(b.reported_on) - new Date(a.reported_on)
+      )
+      .slice(0, 5);
+
+    const table = $("topCriticalTable");
+    table.replaceChildren();
+
+    for (const issue of top) {
+      const row = document.createElement("tr");
+
+      addCell(row, "#" + issue.issue_id).className = "issue-id";
+      addCell(row, issue.title).className = "primary-cell";
+      addCell(row, "").appendChild(projectChip(issue.project_name));
+      addCell(row, formatDate(issue.reported_on)).className = "num";
+      addCell(row, "").appendChild(statusBadge(issue.status));
+      addCell(row, "").appendChild(severityBadge(issue.severity));
+
+      table.appendChild(row);
+    }
+
+    $("topCriticalEmpty").hidden = top.length > 0;
   }
 
   // ========================================
