@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,255 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BugPilot AI - Reports</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="/js/layout.js"></script>
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
-            padding: 30px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        h1 {
-            font-size: 28px;
-        }
-
-        h2 {
-            font-size: 19px;
-            margin-bottom: 18px;
-        }
-
-        .subtitle {
-            color: #94a3b8;
-            margin-top: 8px;
-        }
-
-        button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 7px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
-        }
-
-        .card, .panel {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 22px;
-        }
-
-        .card p {
-            color: #94a3b8;
-            margin-bottom: 12px;
-        }
-
-        .card h2 {
-            font-size: 30px;
-            margin: 0;
-        }
-
-        .chart-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            height: 280px;
-            position: relative;
-        }
-
         .views-container {
-            display: grid;
-            gap: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--sp-6);
         }
 
-        .table-wrapper {
-            overflow-x: auto;
+        .section-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--sp-4);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px;
+        .section-heading .card-title {
+            font-size: var(--text-lg);
         }
 
-        th, td {
-            text-align: left;
-            padding: 13px;
-            border-bottom: 1px solid #334155;
-            font-size: 13px;
+        /* Headers wrap so they no longer dictate column width;
+           cells get a floor so short names stay on one line. */
+        .report-table th {
+            text-transform: capitalize;
+            white-space: normal;
+            vertical-align: bottom;
+            min-width: 96px;
+            padding-top: var(--sp-3);
+            padding-bottom: var(--sp-3);
         }
 
-        th {
-            color: #93c5fd;
-            background: #263449;
+        .report-table td {
+            min-width: 96px;
+            max-width: 420px;
         }
 
-        tr:hover td {
-            background: #263449;
+        /* Short values (names, projects, dates) never break mid-value. */
+        .report-table td.short-text {
+            white-space: nowrap;
+        }
+
+        /* Long free text (titles, descriptions) gets a wider floor. */
+        .report-table td.long-text {
+            min-width: 240px;
+        }
+
+        .report-table td:first-child {
+            color: var(--text-primary);
+            font-weight: 500;
         }
 
         .status {
-            color: #94a3b8;
-            padding: 12px 0;
+            padding: var(--sp-4) 0;
+            color: var(--text-quaternary);
         }
 
         .error {
-            color: #f87171;
+            color: var(--sev-critical);
         }
 
-        .back-link {
-            color: #93c5fd;
-            text-decoration: none;
-            margin-right: 15px;
-        }
-
-        /* Report search and export toolbar */
-        .report-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .report-search {
-            flex: 1;
-            min-width: 200px;
-            padding: 11px 13px;
-            background: #0f172a;
-            color: white;
-            border: 1px solid #475569;
-            border-radius: 7px;
-            font-size: 14px;
-        }
-
-        .report-search:focus {
-            outline: 2px solid #3b82f6;
-        }
-
-        .clear-search-btn {
-            background: #475569;
-        }
-
-        .export-btn {
-            background: #059669;
-        }
-
-        .export-btn:hover {
-            background: #047857;
-        }
-
-        .record-count {
-            color: #94a3b8;
-            font-size: 13px;
-            margin-bottom: 12px;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
-            }
+        .card .notice.error {
+            margin: var(--sp-5) var(--sp-6);
         }
     </style>
 </head>
 
 <body>
 
-<header>
-    <div>
-        <h1>Reporting Dashboard</h1>
-        <p class="subtitle">BugPilot AI - Database Analytics</p>
-    </div>
+<main id="app-content" class="pre-shell">
 
-    <div>
-        <a href="/dashboard" class="back-link">Back to Dashboard</a>
-        <button onclick="loadReports()">Refresh Reports</button>
-    </div>
-</header>
-
-<!-- SUMMARY CARDS -->
-<section class="summary-grid">
-    <div class="card">
-        <p>Urgent Issues</p>
-        <h2 id="urgentCount">--</h2>
-    </div>
-
-    <div class="card">
-        <p>Active Developers</p>
-        <h2 id="developerCount">--</h2>
-    </div>
-
-    <div class="card">
-        <p>Projects</p>
-        <h2 id="projectCount">--</h2>
-    </div>
-
-    <div class="card">
-        <p>Accepted Solutions</p>
-        <h2 id="solutionCount">--</h2>
-    </div>
-</section>
-
-<!-- CHARTS -->
-<section class="chart-grid">
-    <div class="panel">
-        <h2>Issue Severity Distribution</h2>
-        <div class="chart-container">
-            <canvas id="severityChart"></canvas>
+    <!-- SUMMARY CARDS -->
+    <section class="stat-grid" aria-label="Report summary">
+        <div class="card stat-card">
+            <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 3.4 1.9 15a1.6 1.6 0 0 0 1.4 2.4h13.4a1.6 1.6 0 0 0 1.4-2.4L11.4 3.4a1.6 1.6 0 0 0-2.8 0ZM10 7.5v3.3M10 14.2h.01"/></svg>
+            </span>
+            <div>
+                <div class="stat-label">Urgent issues</div>
+                <div class="stat-row"><span id="urgentCount" class="stat-value">--</span></div>
+            </div>
         </div>
-    </div>
 
-    <div class="panel">
-        <h2>Developer Workload</h2>
-        <div class="chart-container">
-            <canvas id="workloadChart"></canvas>
+        <div class="card stat-card">
+            <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round"><circle cx="8" cy="7" r="3"/><path d="M2.5 17c.6-2.9 2.8-4.5 5.5-4.5s4.9 1.6 5.5 4.5M13 4.2a3 3 0 0 1 0 5.6M15.5 12.8c1 .7 1.7 2 2 3.7"/></svg>
+            </span>
+            <div>
+                <div class="stat-label">Active developers</div>
+                <div class="stat-row"><span id="developerCount" class="stat-value">--</span></div>
+            </div>
         </div>
-    </div>
-</section>
 
-<!-- SQL VIEW TABLES -->
-<section>
-    <h2>SQL View Reports</h2>
-    <p class="subtitle" style="margin-bottom: 20px;">
-        Results generated directly from the ten Phase II SQL views.
-    </p>
+        <div class="card stat-card">
+            <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linejoin="round"><path d="M2.5 5.8c0-.9.7-1.6 1.6-1.6h3.5l1.7 1.7h6.6c.9 0 1.6.7 1.6 1.6v7.7c0 .9-.7 1.6-1.6 1.6H4.1c-.9 0-1.6-.7-1.6-1.6Z"/></svg>
+            </span>
+            <div>
+                <div class="stat-label">Projects</div>
+                <div class="stat-row"><span id="projectCount" class="stat-value">--</span></div>
+            </div>
+        </div>
 
-    <div id="viewsContainer" class="views-container">
-        <p class="status">Loading reports...</p>
-    </div>
-</section>
+        <div class="card stat-card">
+            <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="m6.7 10 2.2 2.2 4.4-4.4"/></svg>
+            </span>
+            <div>
+                <div class="stat-label">Accepted solutions</div>
+                <div class="stat-row"><span id="solutionCount" class="stat-value">--</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHARTS -->
+    <section class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Issue severity distribution</h2>
+                    <p class="card-sub">From the Issue Details view.</p>
+                </div>
+            </div>
+            <div class="chart-box">
+                <canvas id="severityChart" role="img" aria-label="Issue severity distribution"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Developer workload</h2>
+                    <p class="card-sub">From the Developer Workload view.</p>
+                </div>
+            </div>
+            <div class="chart-box">
+                <canvas id="workloadChart" role="img" aria-label="Developer workload"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- SQL VIEW TABLES -->
+    <section class="stack" style="gap: var(--sp-5)">
+        <div class="section-heading">
+            <div>
+                <h2 class="card-title">SQL view reports</h2>
+                <p class="card-sub">
+                    Results generated directly from the ten Phase II SQL views.
+                </p>
+            </div>
+
+            <div class="field" style="min-width: 260px">
+                <label class="label" for="viewSelect">View</label>
+                <select id="viewSelect" class="select input-sm">
+                    <option value="">All reports</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="viewsContainer" class="views-container">
+            <p class="status">Loading reports...</p>
+        </div>
+    </section>
+
+</main>
 
 <script>
     // API endpoint names and display titles
@@ -274,6 +191,10 @@
     const reportData = {};
     let severityChart = null;
     let workloadChart = null;
+
+    const token = name =>
+        getComputedStyle(document.documentElement)
+            .getPropertyValue(name).trim();
 
     // Fetch data from the backend
     async function api(url) {
@@ -296,6 +217,38 @@
         return result;
     }
 
+    // MySQL DATE columns arrive as local midnight in ISO form
+    // (e.g. "2026-09-28T04:00:00.000Z"). Show those as "Sep 28, 2026",
+    // matching the dashboard. Real timestamps and the CSV are untouched.
+    const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+    const PLAIN_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+    function formatDateOnly(text) {
+        let date = null;
+        const plain = PLAIN_DATE.exec(text);
+
+        if (plain) {
+            date = new Date(Number(plain[1]), Number(plain[2]) - 1, Number(plain[3]));
+        } else if (ISO_DATETIME.test(text)) {
+            const parsed = new Date(text);
+            const isLocalMidnight =
+                parsed.getHours() === 0 &&
+                parsed.getMinutes() === 0 &&
+                parsed.getSeconds() === 0 &&
+                parsed.getMilliseconds() === 0;
+
+            if (isLocalMidnight) date = parsed;
+        }
+
+        if (!date || Number.isNaN(date.getTime())) return null;
+
+        return date.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
+    }
+
     // Safely create table cells
     function createCell(value, isHeader = false) {
         const cell = document.createElement(isHeader ? "th" : "td");
@@ -305,63 +258,202 @@
         } else if (typeof value === "object") {
             cell.textContent = JSON.stringify(value);
         } else {
-            cell.textContent = String(value);
+            const text = String(value);
+            const dateOnly = isHeader ? null : formatDateOnly(text);
+
+            cell.textContent = dateOnly ?? text;
+
+            if (dateOnly) {
+                cell.title = text.slice(0, 10);
+            }
         }
 
         return cell;
     }
 
+    function svgIcon(paths) {
+        const span = document.createElement("span");
+        span.innerHTML =
+            '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" ' +
+            'stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round" ' +
+            'aria-hidden="true">' + paths + "</svg>";
+        return span.firstChild;
+    }
+
+    // Card header shared by every report panel
+    function panelHeader(report) {
+        const header = document.createElement("div");
+        header.className = "card-header";
+
+        const titles = document.createElement("div");
+        const heading = document.createElement("h2");
+        heading.className = "card-title";
+        heading.textContent = report.title;
+        titles.appendChild(heading);
+        header.appendChild(titles);
+
+        return { header, titles };
+    }
+
+    // ------------------------------------------
+    // Export dropdown: CSV today, PDF slot reserved.
+    // ------------------------------------------
+    function buildExportMenu(report, columns, rows) {
+        const wrap = document.createElement("div");
+        wrap.className = "dropdown";
+
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "btn";
+        toggle.dataset.exportToggle = report.id;
+        toggle.setAttribute("aria-haspopup", "menu");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.append(
+            svgIcon('<path d="M17.5 12.5v2.7c0 1.3-1 2.3-2.3 2.3H4.8c-1.3 0-2.3-1-2.3-2.3v-2.7M5.8 8.3 10 12.5l4.2-4.2M10 12.5v-10"/>'),
+            document.createTextNode("Export"),
+            svgIcon('<path d="m5 7.5 5 5 5-5"/>')
+        );
+
+        const menu = document.createElement("div");
+        menu.className = "dropdown-menu";
+        menu.setAttribute("role", "menu");
+        menu.hidden = true;
+
+        // Existing CSV export (unchanged behaviour)
+        const csvItem = document.createElement("button");
+        csvItem.type = "button";
+        csvItem.className = "dropdown-item";
+        csvItem.setAttribute("role", "menuitem");
+        csvItem.append(
+            svgIcon('<path d="M11.7 1.7H5a1.7 1.7 0 0 0-1.7 1.6v13.4c0 .9.8 1.6 1.7 1.6h10c.9 0 1.7-.7 1.7-1.6v-10Z"/><path d="M11.7 1.7v5h5"/>'),
+            document.createTextNode("Export CSV")
+        );
+        csvItem.addEventListener("click", () => {
+            closeMenu();
+            exportCSV(report, columns, rows);
+        });
+
+        const divider = document.createElement("div");
+        divider.className = "dropdown-divider";
+
+        // ==========================================
+        // PDF EXPORT SLOT
+        // PDF export is being added on the backend separately.
+        // When it lands, remove `disabled` and the "Coming soon"
+        // label, and call the PDF export from this click handler
+        // (same report, columns and rows as CSV above).
+        // ==========================================
+        const pdfItem = document.createElement("button");
+        pdfItem.type = "button";
+        pdfItem.className = "dropdown-item";
+        pdfItem.setAttribute("role", "menuitem");
+        pdfItem.dataset.exportFormat = "pdf";
+        pdfItem.disabled = true;
+        pdfItem.title = "PDF export is not available yet.";
+
+        const soon = document.createElement("span");
+        soon.className = "meta";
+        soon.textContent = "Coming soon";
+
+        pdfItem.append(
+            svgIcon('<path d="M11.7 1.7H5a1.7 1.7 0 0 0-1.7 1.6v13.4c0 .9.8 1.6 1.7 1.6h10c.9 0 1.7-.7 1.7-1.6v-10Z"/><path d="M11.7 1.7v5h5"/>'),
+            document.createTextNode("Export PDF"),
+            soon
+        );
+
+        menu.append(csvItem, divider, pdfItem);
+
+        function openMenu() {
+            menu.hidden = false;
+            toggle.setAttribute("aria-expanded", "true");
+            csvItem.focus();
+        }
+
+        function closeMenu() {
+            menu.hidden = true;
+            toggle.setAttribute("aria-expanded", "false");
+        }
+
+        toggle.addEventListener("click", () => {
+            if (menu.hidden) openMenu(); else closeMenu();
+        });
+
+        document.addEventListener("click", event => {
+            if (!wrap.contains(event.target)) closeMenu();
+        });
+
+        wrap.addEventListener("keydown", event => {
+            if (event.key === "Escape" && !menu.hidden) {
+                closeMenu();
+                toggle.focus();
+            }
+        });
+
+        wrap.append(toggle, menu);
+        return wrap;
+    }
+
     // Generate a table for each SQL view
     function displayTable(report, rows) {
-        const panel = document.createElement("div");
-        panel.className = "panel";
+        const panel = document.createElement("section");
+        panel.className = "card table-card panel";
+        panel.dataset.report = report.id;
 
-        const heading = document.createElement("h2");
-        heading.textContent = report.title;
-        panel.appendChild(heading);
+        const { header, titles } = panelHeader(report);
+        panel.appendChild(header);
 
         if (!rows.length) {
             const message = document.createElement("p");
-            message.className = "status";
+            message.className = "empty-state";
             message.textContent = "No records found.";
             panel.appendChild(message);
             return panel;
         }
 
+        // Record count (under the title)
+        const recordCount = document.createElement("p");
+        recordCount.className = "card-sub record-count";
+        titles.appendChild(recordCount);
+
         // Search and export toolbar
         const toolbar = document.createElement("div");
-        toolbar.className = "report-toolbar";
+        toolbar.className = "filter-bar report-toolbar";
+
+        const searchWrap = document.createElement("label");
+        searchWrap.className = "search";
 
         const search = document.createElement("input");
         search.type = "text";
-        search.className = "report-search";
-        search.placeholder = `Search ${report.title}...`;
+        search.className = "input report-search";
+        search.placeholder = `Search ${report.title}`;
         search.setAttribute("aria-label", `Search ${report.title}`);
 
+        searchWrap.append(
+            svgIcon('<circle cx="9" cy="9" r="5.5"/><path d="m17 17-3.9-3.9"/>'),
+            search
+        );
+
         const clearButton = document.createElement("button");
+        clearButton.type = "button";
         clearButton.textContent = "Clear";
-        clearButton.className = "clear-search-btn";
-
-        const exportButton = document.createElement("button");
-        exportButton.textContent = "Export CSV";
-        exportButton.className = "export-btn";
-
-        toolbar.append(search, clearButton, exportButton);
-        panel.appendChild(toolbar);
-
-        // Record count
-        const recordCount = document.createElement("p");
-        recordCount.className = "record-count";
-        panel.appendChild(recordCount);
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "table-wrapper";
-
-        const table = document.createElement("table");
-        const thead = document.createElement("thead");
-        const headerRow = document.createElement("tr");
+        clearButton.className = "btn btn-ghost clear-search-btn";
 
         const columns = Object.keys(rows[0]);
+
+        toolbar.append(
+            searchWrap,
+            clearButton,
+            buildExportMenu(report, columns, rows)
+        );
+        header.appendChild(toolbar);
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-wrap table-wrapper";
+
+        const table = document.createElement("table");
+        table.className = "table compact report-table";
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
 
         columns.forEach(column => {
             headerRow.appendChild(
@@ -378,7 +470,17 @@
             const tr = document.createElement("tr");
 
             columns.forEach(column => {
-                tr.appendChild(createCell(row[column]));
+                const cell = createCell(row[column]);
+
+                const length = cell.textContent.length;
+
+                if (length <= 24) {
+                    cell.classList.add("short-text");
+                } else if (length > 40) {
+                    cell.classList.add("long-text");
+                }
+
+                tr.appendChild(cell);
             });
 
             tbody.appendChild(tr);
@@ -424,11 +526,6 @@
             search.focus();
         });
 
-        // Export all records to CSV
-        exportButton.addEventListener("click", () => {
-            exportCSV(report, columns, rows);
-        });
-
         updateCount();
 
         return panel;
@@ -472,7 +569,7 @@
 
         // UTF-8 BOM helps Excel recognize the encoding
         const blob = new Blob(
-            ["\uFEFF" + csvContent],
+            ["﻿" + csvContent],
             { type: "text/csv;charset=utf-8;" }
         );
 
@@ -491,14 +588,41 @@
         URL.revokeObjectURL(url);
     }
 
+    function applyChartDefaults() {
+        if (!window.Chart) return false;
+
+        Chart.defaults.color = token("--text-tertiary");
+        Chart.defaults.font.family = token("--font");
+        Chart.defaults.borderColor = token("--border-card");
+        return true;
+    }
+
     // Generate severity chart
     function createSeverityChart(rows) {
+        if (!applyChartDefaults()) return;
+
+        // view_issue_details has one row per issue *assignment*, so an
+        // issue with several assignees appears more than once. Count
+        // each issue_id once so the totals match the dashboard.
         const counts = {};
+        const seen = new Set();
 
         rows.forEach(row => {
+            if (row.issue_id !== undefined && row.issue_id !== null) {
+                if (seen.has(row.issue_id)) return;
+                seen.add(row.issue_id);
+            }
+
             const severity = row.severity || "Unknown";
             counts[severity] = (counts[severity] || 0) + 1;
         });
+
+        // Show severities in their natural order.
+        const order = ["Low", "Medium", "High", "Critical"];
+        const labels = Object.keys(counts).sort(
+            (a, b) =>
+                (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99)
+        );
 
         if (severityChart) severityChart.destroy();
 
@@ -507,14 +631,33 @@
             {
                 type: "doughnut",
                 data: {
-                    labels: Object.keys(counts),
+                    labels,
                     datasets: [{
-                        data: Object.values(counts)
+                        data: labels.map(label => counts[label]),
+                        backgroundColor: labels.map(label =>
+                            token("--sev-" + label.toLowerCase()) ||
+                            token("--text-quaternary")
+                        ),
+                        borderColor: token("--bg-primary"),
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    cutout: "62%",
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                padding: 16
+                            }
+                        }
+                    }
                 }
             }
         );
@@ -523,6 +666,7 @@
     // Generate workload chart using detected columns
     function createWorkloadChart(rows) {
         if (!rows.length) return;
+        if (!applyChartDefaults()) return;
 
         const columns = Object.keys(rows[0]);
 
@@ -538,6 +682,12 @@
 
         if (workloadChart) workloadChart.destroy();
 
+        // Leave one step of headroom above the tallest bar.
+        const workloadMax = Math.max(
+            0,
+            ...rows.map(row => Number(row[workloadColumn]) || 0)
+        );
+
         workloadChart = new Chart(
             document.getElementById("workloadChart"),
             {
@@ -548,20 +698,61 @@
                         label: workloadColumn.replaceAll("_", " "),
                         data: rows.map(row =>
                             Number(row[workloadColumn]) || 0
-                        )
+                        ),
+                        backgroundColor: token("--brand-300"),
+                        borderRadius: 6,
+                        maxBarThickness: 40
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
+                        x: {
+                            grid: { display: false },
+                            border: { display: false }
+                        },
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            suggestedMax: workloadMax + 1,
+                            border: { display: false },
+                            ticks: {
+                                precision: 0,
+                                color: token("--text-axis")
+                            }
                         }
                     }
                 }
             }
         );
+    }
+
+    // ------------------------------------------
+    // View selector: show every report or a single one.
+    // ------------------------------------------
+    function populateViewSelect() {
+        const select = document.getElementById("viewSelect");
+
+        for (const report of reports) {
+            const option = document.createElement("option");
+            option.value = report.id;
+            option.textContent = report.title;
+            select.appendChild(option);
+        }
+
+        select.addEventListener("change", applyViewSelection);
+    }
+
+    function applyViewSelection() {
+        const selected = document.getElementById("viewSelect").value;
+
+        document
+            .querySelectorAll("#viewsContainer > [data-report]")
+            .forEach(panel => {
+                panel.hidden =
+                    Boolean(selected) && panel.dataset.report !== selected;
+            });
     }
 
     // Load all ten reports
@@ -606,20 +797,23 @@
                     displayTable(report, rows)
                 );
             } else {
-                const panel = document.createElement("div");
-                panel.className = "panel";
+                const panel = document.createElement("section");
+                panel.className = "card table-card panel";
+                panel.dataset.report = report.id;
 
-                const heading = document.createElement("h2");
-                heading.textContent = report.title;
+                const { header } = panelHeader(report);
 
                 const message = document.createElement("p");
-                message.className = "error";
+                message.className = "notice error";
                 message.textContent = result.reason.message;
 
-                panel.append(heading, message);
+                panel.append(header, message);
                 container.appendChild(panel);
             }
         });
+
+        // Keep the chosen view after a refresh.
+        applyViewSelection();
 
         // Update summary cards
         document.getElementById("urgentCount").textContent =
@@ -644,33 +838,46 @@
         }
     }
 
-    // Verify login and configure dashboard navigation
+    // Verify login and render the shared shell
     async function initializeReports() {
         try {
             const result = await api("/api/auth/me");
 
-            // Send users back to their correct dashboard
-            const role = result.user.role;
+            const refreshButton = document.createElement("button");
+            refreshButton.type = "button";
+            refreshButton.className = "btn";
+            refreshButton.id = "refreshReportsBtn";
+            refreshButton.append(
+                svgIcon('<path d="M2.5 8.3A7.5 7.5 0 0 1 16 5.5M17.5 11.7A7.5 7.5 0 0 1 4 14.5M16.5 2v3.8h-3.8M3.5 18v-3.8h3.8"/>'),
+                document.createTextNode("Refresh reports")
+            );
+            refreshButton.addEventListener("click", () => loadReports());
 
-            const dashboardRoutes = {
-                admin: "/admin",
-                user: "/dashboard",
-                guest: "/guest"
-            };
-
-            document.querySelector(".back-link").href =
-                dashboardRoutes[role] || "/login";
+            // Sidebar "Dashboard" link points at the role's own
+            // dashboard (/admin or /dashboard).
+            await BugPilotLayout.mount({
+                user: result.user,
+                active: "reports",
+                title: "Reports",
+                subtitle: "Database analytics from the BugPilot AI SQL views.",
+                breadcrumb: ["Reports"],
+                actions: [refreshButton]
+            });
 
             await loadReports();
 
         } catch (error) {
             console.error("Could not initialize reports:", error);
 
+            document.getElementById("app-content")
+                ?.classList.remove("pre-shell");
+
             document.getElementById("viewsContainer").textContent =
                 error.message;
         }
     }
 
+    populateViewSelect();
     initializeReports();
 </script>
 
