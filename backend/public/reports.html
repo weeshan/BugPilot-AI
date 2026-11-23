@@ -615,6 +615,12 @@
 
         if (workloadChart) workloadChart.destroy();
 
+        // Leave one step of headroom above the tallest bar.
+        const workloadMax = Math.max(
+            0,
+            ...rows.map(row => Number(row[workloadColumn]) || 0)
+        );
+
         workloadChart = new Chart(
             document.getElementById("workloadChart"),
             {
@@ -642,6 +648,7 @@
                         },
                         y: {
                             beginAtZero: true,
+                            suggestedMax: workloadMax + 1,
                             border: { display: false },
                             ticks: {
                                 precision: 0,
