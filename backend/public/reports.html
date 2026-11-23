@@ -28,12 +28,30 @@
             font-size: var(--text-lg);
         }
 
+        /* Headers wrap so they no longer dictate column width;
+           cells get a floor so short names stay on one line. */
         .report-table th {
             text-transform: capitalize;
+            white-space: normal;
+            vertical-align: bottom;
+            min-width: 96px;
+            padding-top: var(--sp-3);
+            padding-bottom: var(--sp-3);
         }
 
         .report-table td {
+            min-width: 96px;
             max-width: 420px;
+        }
+
+        /* Short values (names, projects, dates) never break mid-value. */
+        .report-table td.short-text {
+            white-space: nowrap;
+        }
+
+        /* Long free text (titles, descriptions) gets a wider floor. */
+        .report-table td.long-text {
+            min-width: 240px;
         }
 
         .report-table td:first-child {
@@ -413,7 +431,17 @@
             const tr = document.createElement("tr");
 
             columns.forEach(column => {
-                tr.appendChild(createCell(row[column]));
+                const cell = createCell(row[column]);
+
+                const length = cell.textContent.length;
+
+                if (length <= 24) {
+                    cell.classList.add("short-text");
+                } else if (length > 40) {
+                    cell.classList.add("long-text");
+                }
+
+                tr.appendChild(cell);
             });
 
             tbody.appendChild(tr);
