@@ -8,159 +8,314 @@
 
     <title>BugPilot AI - Login</title>
 
+    <link rel="stylesheet" href="/css/app.css">
+
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        /* ==================================
+           LOGIN PAGE: SPLIT LAYOUT
+           Form left, product preview right.
+           ================================== */
 
         body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #0f172a;
-            color: white;
-            font-family: Arial, sans-serif;
-            padding: 24px;
+            background: var(--bg-login);
         }
 
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 36px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            font-size: 36px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #60a5fa;
-            margin: 0;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 32px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        input {
-            width: 100%;
-            padding: 13px;
-            margin-bottom: 20px;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            background: #0f172a;
-            color: white;
-            font-size: 15px;
-        }
-
-        input:focus {
-            outline: 2px solid #60a5fa;
-        }
-
-        button {
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        button:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 13px;
-            border-radius: 8px;
-            border: none;
-            background: #3b82f6;
-            color: white;
-            font-weight: bold;
-        }
-
-        .login-btn:hover:not(:disabled) {
-            background: #2563eb;
-        }
-
-        .guest-btn {
-            width: 100%;
-            padding: 13px;
-            border-radius: 8px;
-            background: transparent;
-            color: #cbd5e1;
-            border: 1px solid #475569;
-        }
-
-        .guest-btn:hover:not(:disabled) {
-            background: #334155;
-        }
-
-        .divider {
-            text-align: center;
-            color: #64748b;
-            margin: 20px 0;
-        }
-
-        .signup-link {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 14px;
-            color: #94a3b8;
-            line-height: 1.8;
-        }
-
-        .text-link {
-            background: none;
-            border: none;
-            padding: 0;
-            color: #60a5fa;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .text-link:hover {
-            text-decoration: underline;
-        }
-
-        #message {
-            text-align: center;
-            min-height: 20px;
-            margin-top: 18px;
-            color: #f87171;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
+        /* Toggled by the page script (login <-> register) */
         .hidden {
             display: none;
         }
 
-        .password-hint {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: -12px;
-            margin-bottom: 20px;
+        .auth {
+            display: grid;
+            grid-template-columns: 640px minmax(0, 1fr);
+            min-height: 100vh;
         }
 
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 26px;
+        .auth-form-side {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 128px 140px 96px;
+            background: var(--bg-login);
+        }
+
+        .auth-form-side .brand {
+            padding: 0;
+            font-size: var(--text-xl);
+        }
+
+        .auth-body {
+            width: 100%;
+            max-width: 360px;
+            margin: 80px 0 auto;
+        }
+
+        .auth-title {
+            font-size: var(--display-sm);
+            line-height: var(--lh-display-sm);
+        }
+
+        .auth-subtitle {
+            margin-top: 12px;
+            color: var(--text-quaternary);
+            font-size: var(--text-md);
+            line-height: var(--lh-md);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .auth-form .input {
+            background: var(--bg-login);
+            border-color: var(--border-login);
+        }
+
+        .auth-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .auth-actions .btn {
+            height: var(--control-h-lg);
+            font-size: var(--text-md);
+        }
+
+        .auth-actions .btn:not(.btn-primary) {
+            background: var(--bg-login);
+            border-color: var(--border-login);
+        }
+
+        .auth-switch {
+            margin-top: 32px;
+            text-align: center;
+            color: var(--text-quaternary);
+        }
+
+        .auth-switch .btn-link {
+            font: inherit;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        #message {
+            min-height: 20px;
+            margin-top: 16px;
+            text-align: center;
+            color: var(--sev-critical);
+        }
+
+        .auth-footer {
+            position: absolute;
+            left: 32px;
+            bottom: 32px;
+            color: var(--text-quaternary);
+            font-size: var(--text-sm);
+        }
+
+        /* ---- Product preview (decorative) ---- */
+
+        .auth-preview {
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-preview);
+        }
+
+        .preview-frame {
+            position: absolute;
+            top: 136px;
+            left: 96px;
+            width: 960px;
+            height: 680px;
+            display: grid;
+            grid-template-columns: 208px minmax(0, 1fr);
+            background: var(--bg-primary);
+            border: 6px solid #1a1b22;
+            outline: 1px solid var(--border-login);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .pv-side {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 10px;
+            border-right: 1px solid var(--border-secondary);
+        }
+
+        .pv-side .brand {
+            font-size: 13px;
+            gap: 6px;
+        }
+
+        .pv-side .brand-mark {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+        }
+
+        .pv-side .brand-mark svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .pv-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pv-nav.on {
+            background: var(--bg-active);
+            color: var(--text-primary);
+        }
+
+        .pv-nav svg {
+            width: 13px;
+            height: 13px;
+            color: var(--text-quaternary);
+        }
+
+        .pv-user {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid var(--border-secondary);
+            border-radius: 8px;
+            font-size: 10px;
+        }
+
+        .pv-user .avatar {
+            width: 24px;
+            height: 24px;
+            font-size: 9px;
+        }
+
+        .pv-main {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 18px 18px 0;
+        }
+
+        .pv-title {
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .pv-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .pv-stat {
+            padding: 10px;
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+        }
+
+        .pv-stat.sel {
+            border-color: var(--border-brand);
+        }
+
+        .pv-stat small {
+            display: block;
+            color: var(--text-tertiary);
+            font-size: 9px;
+        }
+
+        .pv-stat b {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .pv-chart {
+            height: 150px;
+        }
+
+        .pv-chart svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .pv-table {
+            border-top: 1px solid var(--border-secondary);
+            font-size: 10px;
+        }
+
+        .pv-row {
+            display: grid;
+            grid-template-columns: 2.4fr 1.3fr 1fr 1fr;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-secondary);
+            color: var(--text-tertiary);
+        }
+
+        .pv-row.head {
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .pv-row .t {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .pv-row .badge,
+        .pv-row .chip {
+            height: 17px;
+            padding: 0 6px;
+            font-size: 9px;
+        }
+
+        @media (max-width: 1100px) {
+            .auth {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .auth-preview {
+                display: none;
+            }
+
+            .auth-form-side {
+                align-items: center;
+                padding: 32px 16px;
+            }
+
+            .auth-form-side > .brand,
+            .auth-footer {
+                width: 100%;
+                max-width: 360px;
+            }
+
+            .auth-body {
+                margin-top: 56px;
+            }
+
+            .auth-footer {
+                position: static;
+                margin-top: 32px;
             }
         }
     </style>
@@ -168,188 +323,310 @@
 
 <body>
 
-    <div class="login-card">
+<div class="auth">
 
-        <div class="logo">🐛</div>
+    <!-- ================================== -->
+    <!-- FORM SIDE -->
+    <!-- ================================== -->
 
-        <h1>BugPilot AI</h1>
+    <section class="auth-form-side">
 
-        <p class="subtitle">
-            Software Bug Tracking System
-        </p>
-
-        <!-- ================================== -->
-        <!-- 1. LOGIN SECTION -->
-        <!-- ================================== -->
-
-        <div id="loginSection">
-
-            <form id="loginForm">
-
-                <label for="username">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    id="username"
-                    placeholder="Enter your username"
-                    autocomplete="username"
-                    maxlength="50"
-                    required
-                >
-
-                <label for="password">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Enter your password"
-                    autocomplete="current-password"
-                    required
-                >
-
-                <button
-                    class="login-btn"
-                    id="loginBtn"
-                    type="submit"
-                >
-                    Sign In
-                </button>
-
-            </form>
-
-            <div class="divider">OR</div>
-
-            <button
-                class="guest-btn"
-                id="guestBtn"
-                type="button"
-            >
-                Continue as Guest
-            </button>
-
-            <p class="signup-link">
-                Don't have an account?
-
-                <button
-                    class="text-link"
-                    id="showRegisterBtn"
-                    type="button"
-                >
-                    Create Account
-                </button>
-            </p>
-
+        <div class="brand">
+            <span class="brand-mark">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <ellipse cx="10" cy="11.5" rx="4.5" ry="5.5" fill="#7f56da"/>
+                    <circle cx="10" cy="5" r="2.5" fill="#7f56da"/>
+                    <path d="M10 7v10" stroke="#cecfd3" stroke-width="1.2"/>
+                </svg>
+            </span>
+            <span>BugPilot AI</span>
         </div>
 
-        <!-- ================================== -->
-        <!-- 2. CREATE ACCOUNT SECTION -->
-        <!-- ================================== -->
+        <div class="auth-body">
 
-        <div
-            id="registerSection"
-            class="hidden"
-        >
+            <!-- ================================== -->
+            <!-- 1. LOGIN SECTION -->
+            <!-- ================================== -->
 
-            <form id="registerForm">
+            <div id="loginSection">
 
-                <label for="registerUsername">
-                    Username
-                </label>
+                <h1 class="auth-title">Log in</h1>
 
-                <input
-                    type="text"
-                    id="registerUsername"
-                    placeholder="Choose a username"
-                    autocomplete="username"
-                    minlength="3"
-                    maxlength="50"
-                    pattern="[A-Za-z0-9_.-]{3,50}"
-                    title="Use 3-50 letters, numbers, underscores, dots or hyphens."
-                    required
-                >
-
-                <label for="registerEmail">
-                    Email Address
-                </label>
-
-                <input
-                    type="email"
-                    id="registerEmail"
-                    placeholder="Enter your email"
-                    autocomplete="email"
-                    maxlength="254"
-                    required
-                >
-
-                <label for="registerPassword">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="registerPassword"
-                    placeholder="Create a password"
-                    autocomplete="new-password"
-                    minlength="8"
-                    required
-                >
-
-                <p class="password-hint">
-                    At least 8 characters.
+                <p class="auth-subtitle">
+                    Welcome back! Please enter your details.
                 </p>
 
-                <label for="confirmPassword">
-                    Confirm Password
-                </label>
+                <form id="loginForm" class="auth-form">
 
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    placeholder="Confirm your password"
-                    autocomplete="new-password"
-                    minlength="8"
-                    required
-                >
+                    <div class="field">
+                        <label class="label" for="username">
+                            Username
+                        </label>
 
-                <button
-                    class="login-btn"
-                    id="registerBtn"
-                    type="submit"
-                >
-                    Create Account
-                </button>
+                        <input
+                            class="input"
+                            type="text"
+                            id="username"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            maxlength="50"
+                            required
+                        >
+                    </div>
 
-            </form>
+                    <div class="field">
+                        <label class="label" for="password">
+                            Password
+                        </label>
 
-            <p class="signup-link">
-                Already have an account?
+                        <input
+                            class="input"
+                            type="password"
+                            id="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                    </div>
 
-                <button
-                    class="text-link"
-                    id="showLoginBtn"
-                    type="button"
-                >
-                    Sign In
-                </button>
-            </p>
+                    <div class="auth-actions">
+                        <button
+                            class="btn btn-primary btn-block"
+                            id="loginBtn"
+                            type="submit"
+                        >
+                            Sign in
+                        </button>
+
+                        <button
+                            class="btn btn-block"
+                            id="guestBtn"
+                            type="button"
+                        >
+                            Continue as guest
+                        </button>
+                    </div>
+
+                </form>
+
+                <p class="auth-switch">
+                    Don't have an account?
+
+                    <button
+                        class="btn-link"
+                        id="showRegisterBtn"
+                        type="button"
+                    >
+                        Create account
+                    </button>
+                </p>
+
+            </div>
+
+            <!-- ================================== -->
+            <!-- 2. CREATE ACCOUNT SECTION -->
+            <!-- ================================== -->
+
+            <div
+                id="registerSection"
+                class="hidden"
+            >
+
+                <h1 class="auth-title">Create account</h1>
+
+                <p class="auth-subtitle">
+                    Sign up to report and track bugs.
+                </p>
+
+                <form id="registerForm" class="auth-form">
+
+                    <div class="field">
+                        <label class="label" for="registerUsername">
+                            Username
+                        </label>
+
+                        <input
+                            class="input"
+                            type="text"
+                            id="registerUsername"
+                            placeholder="Choose a username"
+                            autocomplete="username"
+                            minlength="3"
+                            maxlength="50"
+                            pattern="[A-Za-z0-9_.-]{3,50}"
+                            title="Use 3-50 letters, numbers, underscores, dots or hyphens."
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="registerEmail">
+                            Email
+                        </label>
+
+                        <input
+                            class="input"
+                            type="email"
+                            id="registerEmail"
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                            maxlength="254"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="registerPassword">
+                            Password
+                        </label>
+
+                        <input
+                            class="input"
+                            type="password"
+                            id="registerPassword"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            aria-describedby="passwordHint"
+                            required
+                        >
+
+                        <p class="hint" id="passwordHint">
+                            Must be at least 8 characters.
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="confirmPassword">
+                            Confirm password
+                        </label>
+
+                        <input
+                            class="input"
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirm your password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                        >
+                    </div>
+
+                    <div class="auth-actions">
+                        <button
+                            class="btn btn-primary btn-block"
+                            id="registerBtn"
+                            type="submit"
+                        >
+                            Create account
+                        </button>
+                    </div>
+
+                </form>
+
+                <p class="auth-switch">
+                    Already have an account?
+
+                    <button
+                        class="btn-link"
+                        id="showLoginBtn"
+                        type="button"
+                    >
+                        Log in
+                    </button>
+                </p>
+
+            </div>
+
+            <!-- ================================== -->
+            <!-- 3. STATUS MESSAGE -->
+            <!-- ================================== -->
+
+            <p
+                id="message"
+                role="status"
+                aria-live="polite"
+            ></p>
 
         </div>
 
-        <!-- ================================== -->
-        <!-- 3. STATUS MESSAGE -->
-        <!-- ================================== -->
+        <p class="auth-footer">© BugPilot AI</p>
 
-        <p
-            id="message"
-            role="status"
-            aria-live="polite"
-        ></p>
+    </section>
 
-    </div>
+    <!-- ================================== -->
+    <!-- PRODUCT PREVIEW (decorative only) -->
+    <!-- ================================== -->
+
+    <section class="auth-preview" aria-hidden="true">
+        <div class="preview-frame">
+
+            <div class="pv-side">
+                <div class="brand">
+                    <span class="brand-mark">
+                        <svg viewBox="0 0 20 20">
+                            <ellipse cx="10" cy="11.5" rx="4.5" ry="5.5" fill="#7f56da"/>
+                            <circle cx="10" cy="5" r="2.5" fill="#7f56da"/>
+                        </svg>
+                    </span>
+                    <span>BugPilot AI</span>
+                </div>
+                <div class="pv-nav on">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67">
+                        <rect x="3" y="3" width="6" height="8" rx="1.5"/><rect x="11" y="3" width="6" height="5" rx="1.5"/>
+                        <rect x="11" y="10" width="6" height="7" rx="1.5"/><rect x="3" y="13" width="6" height="4" rx="1.5"/>
+                    </svg>
+                    Dashboard
+                </div>
+                <div class="pv-nav">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.67">
+                        <path d="M10 2.5a7.5 7.5 0 1 0 7.5 7.5H10z"/><path d="M12.5 2.9a7.5 7.5 0 0 1 4.6 4.6h-4.6z"/>
+                    </svg>
+                    Reports
+                </div>
+                <div class="pv-user">
+                    <span class="avatar">BP</span>
+                    <span>Team member</span>
+                </div>
+            </div>
+
+            <div class="pv-main">
+                <div class="pv-title">Dashboard</div>
+
+                <div class="pv-stats">
+                    <div class="pv-stat sel"><small>Total issues</small><b>128</b></div>
+                    <div class="pv-stat"><small>Open issues</small><b>42</b></div>
+                    <div class="pv-stat"><small>Critical issues</small><b>7</b></div>
+                </div>
+
+                <div class="pv-chart">
+                    <svg viewBox="0 0 600 150" preserveAspectRatio="none">
+                        <g stroke="#1f1f1f" stroke-width="1">
+                            <line x1="0" y1="20" x2="600" y2="20"/>
+                            <line x1="0" y1="60" x2="600" y2="60"/>
+                            <line x1="0" y1="100" x2="600" y2="100"/>
+                            <line x1="0" y1="140" x2="600" y2="140"/>
+                        </g>
+                        <polyline fill="none" stroke="#ab9dca" stroke-width="2"
+                            points="0,95 55,90 110,88 165,84 220,93 275,86 330,90 385,66 440,62 495,66 550,62 600,55"/>
+                        <polyline fill="none" stroke="#7f56da" stroke-width="2" stroke-dasharray="2 5"
+                            points="0,118 55,117 110,116 165,115 220,124 275,113 330,116 385,101 440,108 495,112 550,108 600,106"/>
+                    </svg>
+                </div>
+
+                <div class="pv-table">
+                    <div class="pv-row head"><span>Issue</span><span>Project</span><span>Severity</span><span>Status</span></div>
+                    <div class="pv-row"><span class="t">Payment fails on retry</span><span><span class="chip">Checkout</span></span><span><span class="badge sev sev-critical">Critical</span></span><span><span class="badge status-open"><span class="dot"></span>Open</span></span></div>
+                    <div class="pv-row"><span class="t">Crash on rotate</span><span><span class="chip">Mobile App</span></span><span><span class="badge sev sev-high">High</span></span><span><span class="badge status-in-progress"><span class="dot"></span>In Progress</span></span></div>
+                    <div class="pv-row"><span class="t">Refunds double-counted</span><span><span class="chip">Analytics</span></span><span><span class="badge sev sev-medium">Medium</span></span><span><span class="badge status-resolved"><span class="dot"></span>Resolved</span></span></div>
+                    <div class="pv-row"><span class="t">Reset email missing</span><span><span class="chip">Portal</span></span><span><span class="badge sev sev-low">Low</span></span><span><span class="badge status-closed"><span class="dot"></span>Closed</span></span></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
 
     <script>
 
@@ -390,11 +667,11 @@
             message.textContent = text;
 
             if (type === "success") {
-                message.style.color = "#4ade80";
+                message.style.color = "var(--success-text)";
             } else if (type === "info") {
-                message.style.color = "#93c5fd";
+                message.style.color = "var(--text-tertiary)";
             } else {
-                message.style.color = "#f87171";
+                message.style.color = "var(--sev-critical)";
             }
         }
 
