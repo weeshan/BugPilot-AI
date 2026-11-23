@@ -217,6 +217,38 @@
         return result;
     }
 
+    // MySQL DATE columns arrive as local midnight in ISO form
+    // (e.g. "2026-09-28T04:00:00.000Z"). Show those as "Sep 28, 2026",
+    // matching the dashboard. Real timestamps and the CSV are untouched.
+    const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+    const PLAIN_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+    function formatDateOnly(text) {
+        let date = null;
+        const plain = PLAIN_DATE.exec(text);
+
+        if (plain) {
+            date = new Date(Number(plain[1]), Number(plain[2]) - 1, Number(plain[3]));
+        } else if (ISO_DATETIME.test(text)) {
+            const parsed = new Date(text);
+            const isLocalMidnight =
+                parsed.getHours() === 0 &&
+                parsed.getMinutes() === 0 &&
+                parsed.getSeconds() === 0 &&
+                parsed.getMilliseconds() === 0;
+
+            if (isLocalMidnight) date = parsed;
+        }
+
+        if (!date || Number.isNaN(date.getTime())) return null;
+
+        return date.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
+    }
+
     // Safely create table cells
     function createCell(value, isHeader = false) {
         const cell = document.createElement(isHeader ? "th" : "td");
@@ -226,7 +258,14 @@
         } else if (typeof value === "object") {
             cell.textContent = JSON.stringify(value);
         } else {
-            cell.textContent = String(value);
+            const text = String(value);
+            const dateOnly = isHeader ? null : formatDateOnly(text);
+
+            cell.textContent = dateOnly ?? text;
+
+            if (dateOnly) {
+                cell.title = text.slice(0, 10);
+            }
         }
 
         return cell;
