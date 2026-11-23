@@ -671,7 +671,14 @@ a:hover { text-decoration: underline; }
    9. TABLES
    ========================================== */
 
-.table-card { padding: 0; overflow: hidden; }
+/* Overflow stays visible so dropdowns in the header are never clipped;
+   the last child carries the bottom corner radius instead. */
+.table-card { padding: 0; }
+
+.table-card > :last-child {
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
+}
 
 .table-card .card-header { padding: var(--sp-5) var(--sp-6); margin: 0; border-bottom: 1px solid var(--border-secondary); }
 
