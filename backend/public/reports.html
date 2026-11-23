@@ -139,6 +139,13 @@
                     Results generated directly from the ten Phase II SQL views.
                 </p>
             </div>
+
+            <div class="field" style="min-width: 260px">
+                <label class="label" for="viewSelect">View</label>
+                <select id="viewSelect" class="select input-sm">
+                    <option value="">All reports</option>
+                </select>
+            </div>
         </div>
 
         <div id="viewsContainer" class="views-container">
@@ -638,6 +645,33 @@
         );
     }
 
+    // ------------------------------------------
+    // View selector: show every report or a single one.
+    // ------------------------------------------
+    function populateViewSelect() {
+        const select = document.getElementById("viewSelect");
+
+        for (const report of reports) {
+            const option = document.createElement("option");
+            option.value = report.id;
+            option.textContent = report.title;
+            select.appendChild(option);
+        }
+
+        select.addEventListener("change", applyViewSelection);
+    }
+
+    function applyViewSelection() {
+        const selected = document.getElementById("viewSelect").value;
+
+        document
+            .querySelectorAll("#viewsContainer > [data-report]")
+            .forEach(panel => {
+                panel.hidden =
+                    Boolean(selected) && panel.dataset.report !== selected;
+            });
+    }
+
     // Load all ten reports
     async function loadReports() {
         const container = document.getElementById("viewsContainer");
@@ -694,6 +728,9 @@
                 container.appendChild(panel);
             }
         });
+
+        // Keep the chosen view after a refresh.
+        applyViewSelection();
 
         // Update summary cards
         document.getElementById("urgentCount").textContent =
@@ -757,6 +794,7 @@
         }
     }
 
+    populateViewSelect();
     initializeReports();
 </script>
 
