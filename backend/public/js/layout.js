@@ -16,6 +16,7 @@
 //       active: "dashboard",            // "dashboard" | "reports" | "users"
 //       title: "Dashboard",
 //       breadcrumb: ["Dashboard"],
+//       subtitle: "Welcome back.",      // optional line under the title
 //       search: {                       // optional; omit for no search box
 //           placeholder: "Search issues",
 //           onInput: value => { ... }
@@ -278,9 +279,18 @@
 
         // Title + search + actions
         const row = el("div", "topbar-row");
+        const heading = el("div");
         const title = el("h1", "page-title", options.title);
         title.id = "pageTitle";
-        row.appendChild(title);
+        heading.appendChild(title);
+
+        if (options.subtitle) {
+            const subtitle = el("p", "page-subtitle", options.subtitle);
+            subtitle.id = "pageSubtitle";
+            heading.appendChild(subtitle);
+        }
+
+        row.appendChild(heading);
 
         const actions = el("div", "topbar-actions");
         actions.id = "topbarActions";

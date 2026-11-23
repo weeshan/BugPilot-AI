@@ -251,6 +251,11 @@ a:hover { text-decoration: underline; }
 
 .page-title { font-size: var(--display-xs); line-height: var(--lh-display-xs); }
 
+.page-subtitle { margin-top: var(--sp-1); color: var(--text-tertiary); font-size: var(--text-md); line-height: var(--lh-md); }
+
+/* Page content stays invisible until layout.js has moved it into the shell */
+.pre-shell { visibility: hidden; }
+
 .topbar-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-3); }
 
 .content {
