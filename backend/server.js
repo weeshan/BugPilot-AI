@@ -45,6 +45,18 @@ app.disable("x-powered-by");
 
 app.use(express.json({ limit: "20kb" }));
 
+// Static assets (CSS and JS only).
+// HTML pages stay behind their role-checked routes.
+app.use(
+    "/css",
+    express.static(path.join(__dirname, "public", "css"), { index: false })
+);
+
+app.use(
+    "/js",
+    express.static(path.join(__dirname, "public", "js"), { index: false })
+);
+
 // ==========================================
 // 4. MYSQL SESSION STORAGE
 // ==========================================
