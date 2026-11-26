@@ -1,4 +1,3 @@
-
 // ==========================================
 // BUGPILOT AI - MAIN SERVER
 // File: backend/server.js
@@ -22,6 +21,9 @@ const { requireRole } = require("./middleware/auth");
 const authRoutes = require("./routes/auth");
 const issueRoutes = require("./routes/issues");
 const viewsRoutes = require("./routes/views");
+const githubRoutes = require("./routes/github");
+const pdfRoutes = require("./routes/pdf");
+const projectRoutes = require("./routes/projects");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -44,6 +46,25 @@ if (
 app.disable("x-powered-by");
 
 app.use(express.json({ limit: "20kb" }));
+
+// Static assets (CSS and JS only).
+// HTML pages stay behind role-checked routes.
+
+app.use(
+    "/css",
+    express.static(
+        path.join(__dirname, "public", "css"),
+        { index: false }
+    )
+);
+
+app.use(
+    "/js",
+    express.static(
+        path.join(__dirname, "public", "js"),
+        { index: false }
+    )
+);
 
 // ==========================================
 // 4. MYSQL SESSION STORAGE
@@ -84,11 +105,16 @@ app.use(
 // to use an existing login session.
 //
 // It also synchronizes role changes with MySQL.
+//
+// UPDATED:
+// GitHub-linked users display their GitHub username,
+// rather than their internal BugPilot username.
 
 app.use(async (req, res, next) => {
+
     const sessionUser = req.session?.user;
 
-    // No session or a temporary guest session.
+    // No session or temporary guest session.
     if (!sessionUser || sessionUser.role === "guest") {
         return next();
     }
@@ -97,7 +123,9 @@ app.use(async (req, res, next) => {
 
     // Destroy an invalid or revoked session.
     function rejectSession() {
+
         req.session.destroy(error => {
+
             if (error) {
                 return next(error);
             }
@@ -122,10 +150,16 @@ app.use(async (req, res, next) => {
     }
 
     try {
+
+        // ==================================
+        // UPDATED: RETRIEVE GITHUB USERNAME
+        // ==================================
+
         const [users] = await pool.execute(
             `SELECT
                 user_id,
                 username,
+                github_username,
                 role,
                 is_active
              FROM app_users
@@ -133,6 +167,9 @@ app.use(async (req, res, next) => {
              LIMIT 1`,
             [userId]
         );
+
+        // Check whether account still exists
+        // and whether it is active.
 
         if (
             users.length === 0 ||
@@ -144,10 +181,25 @@ app.use(async (req, res, next) => {
 
         const account = users[0];
 
-        // Update session if the admin changed this account.
+        // ==================================
+        // UPDATED: DISPLAY ACTUAL GITHUB NAME
+        // ==================================
+
+        // For GitHub-linked users:
+        // Use github_username, e.g. "weeshan".
+        //
+        // For normal BugPilot accounts:
+        // Use the existing username.
+        //
+        // User IDs and permissions are unchanged.
+
         req.session.user = {
             id: account.user_id,
-            username: account.username,
+
+            username:
+                account.github_username ||
+                account.username,
+
             role: account.role
         };
 
@@ -163,9 +215,12 @@ app.use(async (req, res, next) => {
 // ==========================================
 
 // POST /api/auth/login
+// POST /api/auth/register
 // POST /api/auth/guest
 // GET  /api/auth/me
 // POST /api/auth/logout
+// GET  /api/auth/github
+// GET  /api/auth/github/callback
 
 app.use("/api/auth", authRoutes);
 
@@ -178,7 +233,188 @@ app.use("/api/auth", authRoutes);
 // POST   /api/issues
 // DELETE /api/issues/:id
 
+
+// ==========================================
+// PHASE III: UPDATE ISSUE (PUT /api/issues/:id)
+// Admin and User can update existing issues.
+// ==========================================
+
+app.put(
+    "/api/issues/:id",
+    requireRole("admin", "user"),
+    async (req, res, next) => {
+        try {
+            const issueId = Number(req.params.id);
+
+            if (
+                !Number.isInteger(issueId) ||
+                issueId < 1 ||
+                issueId > 2147483647
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid issue ID."
+                });
+            }
+
+            const input = req.body;
+
+            if (
+                !input ||
+                typeof input !== "object" ||
+                Array.isArray(input)
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: "A JSON object is required."
+                });
+            }
+
+            const allowed = new Set([
+                "title",
+                "description",
+                "severity",
+                "status"
+            ]);
+
+            const fields = Object.keys(input);
+
+            if (
+                !fields.length ||
+                fields.some(field => !allowed.has(field))
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Supply title, description, severity, or status only."
+                });
+            }
+
+            // Validate all supplied fields.
+            for (const field of fields) {
+                const value = input[field];
+
+                if (
+                    typeof value !== "string" ||
+                    !value.trim()
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `${field} cannot be empty.`
+                    });
+                }
+
+                if (
+                    field === "title" &&
+                    value.trim().length > 180
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Title is too long (max 180)."
+                    });
+                }
+
+                if (
+                    field === "description" &&
+                    value.trim().length > 5000
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Description is too long (max 5000)."
+                    });
+                }
+
+                if (
+                    field === "severity" &&
+                    ![
+                        "Low",
+                        "Medium",
+                        "High",
+                        "Critical"
+                    ].includes(value)
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid severity."
+                    });
+                }
+
+                if (
+                    field === "status" &&
+                    ![
+                        "Open",
+                        "In Progress",
+                        "Resolved",
+                        "Closed"
+                    ].includes(value)
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid status."
+                    });
+                }
+            }
+
+            // Column names are validated against the
+            // allowed-field list above.
+            const assignments = fields.map(
+                field => `${field} = ?`
+            );
+
+            const values = fields.map(
+                field => input[field].trim()
+            );
+
+            // Keep issue resolution dates consistent.
+            if (fields.includes("status")) {
+                assignments.push(
+                    "resolved_on = CASE " +
+                    "WHEN ? IN ('Resolved', 'Closed') " +
+                    "THEN COALESCE(resolved_on, CURRENT_DATE()) " +
+                    "ELSE NULL END"
+                );
+
+                values.push(input.status);
+            }
+
+            values.push(issueId);
+
+            const [result] = await pool.execute(
+                `UPDATE issues
+                 SET ${assignments.join(", ")}
+                 WHERE issue_id = ?`,
+                values
+            );
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Issue not found."
+                });
+            }
+
+            const [updated] = await pool.execute(
+                `SELECT *
+                 FROM issues
+                 WHERE issue_id = ?
+                 LIMIT 1`,
+                [issueId]
+            );
+
+            return res.json({
+                success: true,
+                message: "Issue updated successfully.",
+                data: updated[0]
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
 app.use("/api/issues", issueRoutes);
+app.use("/api/projects", projectRoutes);
 
 // ==========================================
 // 8. REPORTING / SQL VIEW ROUTES
@@ -187,14 +423,35 @@ app.use("/api/issues", issueRoutes);
 app.use("/api/views", viewsRoutes);
 
 // ==========================================
-// 9. ADMIN - GET ALL USERS
+// 9. PDF EXPORT ROUTES
+// ==========================================
+
+// GET /api/reports/export/pdf/:reportId
+
+app.use("/api/reports", pdfRoutes);
+
+// ==========================================
+// 10. PUBLIC GITHUB API INTEGRATION
+// ==========================================
+
+// POST /api/github/import
+// GET  /api/github/issues
+//
+// Only public repositories are supported.
+
+app.use("/api/github", githubRoutes);
+
+// ==========================================
+// 11. ADMIN - GET ALL USERS
 // ==========================================
 
 app.get(
     "/api/admin/users",
     requireRole("admin"),
     async (req, res, next) => {
+
         try {
+
             const [users] = await pool.execute(`
                 SELECT
                     user_id,
@@ -220,7 +477,7 @@ app.get(
 );
 
 // ==========================================
-// 10. ADMIN - UPDATE USER ACCOUNT
+// 12. ADMIN - UPDATE USER ACCOUNT
 // PATCH /api/admin/users/:id
 // ==========================================
 
@@ -228,7 +485,9 @@ app.patch(
     "/api/admin/users/:id",
     requireRole("admin"),
     async (req, res, next) => {
+
         try {
+
             const userId = Number(req.params.id);
 
             if (
@@ -250,12 +509,14 @@ app.patch(
             ) {
                 return res.status(400).json({
                     success: false,
-                    message: "Valid role and active status are required."
+                    message:
+                        "Valid role and active status are required."
                 });
             }
 
-            // Do not allow an administrator to disable
-            // or demote their own account.
+            // Prevent administrators from disabling
+            // or demoting their own account.
+
             if (userId === Number(req.session.user.id)) {
                 return res.status(403).json({
                     success: false,
@@ -285,6 +546,7 @@ app.patch(
             return res.json({
                 success: true,
                 message: "User account updated successfully.",
+
                 data: {
                     user_id: userId,
                     role,
@@ -299,11 +561,13 @@ app.patch(
 );
 
 // ==========================================
-// 11. WEBSITE ROUTES
+// 13. WEBSITE ROUTES
 // ==========================================
 
-// Login page
+// LOGIN PAGE
+
 app.get("/login", (req, res) => {
+
     res.set("Cache-Control", "no-store");
 
     return res.sendFile(
@@ -311,7 +575,8 @@ app.get("/login", (req, res) => {
     );
 });
 
-// Prevent direct HTML access.
+// PREVENT DIRECT HTML ACCESS
+
 app.get("/login.html", (req, res) => {
     return res.redirect("/login");
 });
@@ -320,17 +585,32 @@ app.get("/index.html", (req, res) => {
     return res.redirect("/");
 });
 
-// Report page
-app.get("/reports", requireRole("admin", "user"), (req, res) => {
-    res.set("Cache-Control", "no-store");
-    return res.sendFile(
-        path.join(__dirname, "public", "reports.html")
-    );
-});
+// ==========================================
+// 14. REPORTS PAGE
+// ==========================================
 
-// Shared dashboard HTML.
-// Role-specific content is rendered by index.html.
+app.get(
+    "/reports",
+    requireRole("admin", "user"),
+    (req, res) => {
+
+        res.set("Cache-Control", "no-store");
+
+        return res.sendFile(
+            path.join(__dirname, "public", "reports.html")
+        );
+    }
+);
+
+// ==========================================
+// 15. SHARED DASHBOARD HTML
+// ==========================================
+
+// The frontend renders role-specific content.
+// Admin, User, and Guest use protected routes.
+
 function serveDashboard(req, res) {
+
     res.set("Cache-Control", "no-store");
 
     return res.sendFile(
@@ -339,7 +619,7 @@ function serveDashboard(req, res) {
 }
 
 // ==========================================
-// 12. ADMIN DASHBOARD
+// 16. ADMIN DASHBOARD
 // ==========================================
 
 app.get(
@@ -349,7 +629,7 @@ app.get(
 );
 
 // ==========================================
-// 13. REGULAR USER DASHBOARD
+// 17. REGULAR USER DASHBOARD
 // ==========================================
 
 app.get(
@@ -359,7 +639,7 @@ app.get(
 );
 
 // ==========================================
-// 15. GUEST DASHBOARD
+// 18. GUEST DASHBOARD
 // ==========================================
 
 app.get(
@@ -369,10 +649,11 @@ app.get(
 );
 
 // ==========================================
-// 16. HOME PAGE / ROLE REDIRECTION
+// 19. HOME PAGE / ROLE REDIRECTION
 // ==========================================
 
 app.get("/", (req, res) => {
+
     const user = req.session?.user;
 
     if (!user) {
@@ -391,14 +672,17 @@ app.get("/", (req, res) => {
         return res.redirect("/guest");
     }
 
-    return res.status(403).send("Unknown account role.");
+    return res.status(403).send(
+        "Unknown account role."
+    );
 });
 
 // ==========================================
-// 17. UNKNOWN API ENDPOINTS
+// 20. UNKNOWN API ENDPOINTS
 // ==========================================
 
 app.use("/api", (req, res) => {
+
     return res.status(404).json({
         success: false,
         message: "API endpoint not found."
@@ -406,13 +690,14 @@ app.use("/api", (req, res) => {
 });
 
 // ==========================================
-// 18. CENTRALIZED ERROR HANDLING
+// 21. CENTRALIZED ERROR HANDLING
 // ==========================================
 
 app.use((error, req, res, next) => {
+
     console.error("Server error:", error.message);
 
-    // Invalid JSON request.
+    // Invalid JSON request
     if (
         error instanceof SyntaxError &&
         error.status === 400 &&
@@ -424,7 +709,7 @@ app.use((error, req, res, next) => {
         });
     }
 
-    // Request body too large.
+    // Request body too large
     if (error.status === 413) {
         return res.status(413).json({
             success: false,
@@ -432,7 +717,7 @@ app.use((error, req, res, next) => {
         });
     }
 
-    // Database unavailable.
+    // Database unavailable
     if (
         [
             "ECONNREFUSED",
@@ -446,6 +731,7 @@ app.use((error, req, res, next) => {
         });
     }
 
+    // Unknown server error
     return res.status(500).json({
         success: false,
         message: "An internal server error occurred."
@@ -453,32 +739,69 @@ app.use((error, req, res, next) => {
 });
 
 // ==========================================
-// 19. START BUGPILOT AI SERVER
+// 22. START BUGPILOT AI SERVER
 // ==========================================
 
 async function startServer() {
+
     try {
-        // Verify MySQL.
+
+        // Verify MySQL connection
         await pool.query("SELECT 1");
 
         console.log("MySQL connection successful!");
 
-        // Verify session storage.
+        // Verify session storage
         await sessionStore.onReady();
 
         console.log("Session store ready!");
 
-        // Start application.
+        // Start application
         app.listen(PORT, () => {
+
             console.log(
                 `BugPilot AI running at http://localhost:${PORT}`
             );
         });
 
     } catch (error) {
-        console.error("Startup failed:", error.message);
+
+        console.error(
+            "Startup failed:",
+            error.message
+        );
+
         process.exit(1);
     }
 }
+
+
+// ==========================================
+// BUGPILOT AI - GITHUB ISSUES WEBPAGE
+// Add this at the END of backend/server.js
+//
+// Admin: Allowed
+// User:  Allowed
+// Guest: Denied
+//
+// Uses existing:
+// POST /api/github/import
+// GET  /api/github/issues
+// ==========================================
+
+
+app.get(
+    "/github",
+    requireRole("admin", "user"),
+    (req, res) => {
+        res.set("Cache-Control", "no-store");
+
+        return res.sendFile(
+            path.join(__dirname, "public", "github.html")
+        );
+    }
+);
+
+
 
 startServer();

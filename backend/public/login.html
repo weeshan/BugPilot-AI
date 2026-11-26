@@ -8,693 +8,1426 @@
 
     <title>BugPilot AI - Login</title>
 
+    <link rel="stylesheet" href="/css/app.css">
+
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        /* ==================================
+           LOGIN PAGE: SPLIT LAYOUT
+           Form left, product preview right.
+           ================================== */
 
         body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #0f172a;
-            color: white;
-            font-family: Arial, sans-serif;
-            padding: 24px;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 36px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            font-size: 36px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #60a5fa;
-            margin: 0;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 32px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        input {
-            width: 100%;
-            padding: 13px;
-            margin-bottom: 20px;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            background: #0f172a;
-            color: white;
-            font-size: 15px;
-        }
-
-        input:focus {
-            outline: 2px solid #60a5fa;
-        }
-
-        button {
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        button:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 13px;
-            border-radius: 8px;
-            border: none;
-            background: #3b82f6;
-            color: white;
-            font-weight: bold;
-        }
-
-        .login-btn:hover:not(:disabled) {
-            background: #2563eb;
-        }
-
-        .guest-btn {
-            width: 100%;
-            padding: 13px;
-            border-radius: 8px;
-            background: transparent;
-            color: #cbd5e1;
-            border: 1px solid #475569;
-        }
-
-        .guest-btn:hover:not(:disabled) {
-            background: #334155;
-        }
-
-        .divider {
-            text-align: center;
-            color: #64748b;
-            margin: 20px 0;
-        }
-
-        .signup-link {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 14px;
-            color: #94a3b8;
-            line-height: 1.8;
-        }
-
-        .text-link {
-            background: none;
-            border: none;
-            padding: 0;
-            color: #60a5fa;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .text-link:hover {
-            text-decoration: underline;
-        }
-
-        #message {
-            text-align: center;
-            min-height: 20px;
-            margin-top: 18px;
-            color: #f87171;
-            font-size: 14px;
-            line-height: 1.5;
+            background: var(--bg-login);
         }
 
         .hidden {
             display: none;
         }
 
-        .password-hint {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: -12px;
-            margin-bottom: 20px;
+        .auth {
+            display: grid;
+            grid-template-columns: 640px minmax(0, 1fr);
+            min-height: 100vh;
         }
 
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 26px;
+        .auth-form-side {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 128px 140px 96px;
+            background: var(--bg-login);
+        }
+
+        .auth-form-side .brand {
+            padding: 0;
+            font-size: var(--text-xl);
+        }
+
+        .auth-body {
+            width: 100%;
+            max-width: 360px;
+            margin: 80px 0 auto;
+        }
+
+        .auth-title {
+            font-size: var(--display-sm);
+            line-height: var(--lh-display-sm);
+        }
+
+        .auth-subtitle {
+            margin-top: 12px;
+            color: var(--text-quaternary);
+            font-size: var(--text-md);
+            line-height: var(--lh-md);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .auth-form .input {
+            background: var(--bg-login);
+            border-color: var(--border-login);
+        }
+
+        .auth-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .auth-actions .btn {
+            height: var(--control-h-lg);
+            font-size: var(--text-md);
+        }
+
+        .auth-actions .btn:not(.btn-primary) {
+            background: var(--bg-login);
+            border-color: var(--border-login);
+        }
+
+        /* ==================================
+           NEW: GITHUB LOGIN BUTTON
+           ================================== */
+
+        .auth-actions .btn.github-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            width: 100%;
+            background: var(--bg-login);
+            border: 1px solid var(--border-login);
+            color: var(--text-secondary);
+
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+
+            transition:
+                border-color 0.2s ease,
+                color 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .auth-actions .btn.github-login-btn:hover {
+            border-color: var(--text-tertiary);
+            color: var(--text-primary);
+        }
+
+        .auth-actions .btn.github-login-btn:focus-visible {
+            outline: 2px solid var(--text-primary);
+            outline-offset: 3px;
+        }
+
+        .github-login-btn svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            fill: currentColor;
+        }
+
+        /* ==================================
+           ACCOUNT SWITCHING
+           ================================== */
+
+        .auth-switch {
+            margin-top: 32px;
+            text-align: center;
+            color: var(--text-quaternary);
+        }
+
+        .auth-switch .btn-link {
+            font: inherit;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        #message {
+            min-height: 20px;
+            margin-top: 16px;
+            text-align: center;
+            color: var(--sev-critical);
+        }
+
+        .auth-footer {
+            position: absolute;
+            left: 32px;
+            bottom: 32px;
+            color: var(--text-quaternary);
+            font-size: var(--text-sm);
+        }
+
+        /* ==================================
+           PRODUCT PREVIEW
+           ================================== */
+
+        .auth-preview {
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-preview);
+        }
+
+        .preview-frame {
+            position: absolute;
+            top: 136px;
+            left: 96px;
+
+            width: 960px;
+            height: 680px;
+
+            display: grid;
+            grid-template-columns: 208px minmax(0, 1fr);
+
+            background: var(--bg-primary);
+            border: 6px solid #1a1b22;
+            outline: 1px solid var(--border-login);
+            border-radius: 18px;
+
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .pv-side {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 10px;
+
+            border-right: 1px solid var(--border-secondary);
+        }
+
+        .pv-side .brand {
+            font-size: 13px;
+            gap: 6px;
+        }
+
+        .pv-side .brand-mark {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+        }
+
+        .pv-side .brand-mark svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .pv-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 6px 8px;
+
+            border-radius: 6px;
+            color: var(--text-secondary);
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pv-nav.on {
+            background: var(--bg-active);
+            color: var(--text-primary);
+        }
+
+        .pv-nav svg {
+            width: 13px;
+            height: 13px;
+            color: var(--text-quaternary);
+        }
+
+        .pv-user {
+            margin-top: auto;
+
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 8px;
+
+            border: 1px solid var(--border-secondary);
+            border-radius: 8px;
+
+            font-size: 10px;
+        }
+
+        .pv-user .avatar {
+            width: 24px;
+            height: 24px;
+            font-size: 9px;
+        }
+
+        .pv-main {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+
+            padding: 18px 18px 0;
+        }
+
+        .pv-title {
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .pv-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .pv-stat {
+            padding: 10px;
+
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+        }
+
+        .pv-stat.sel {
+            border-color: var(--border-brand);
+        }
+
+        .pv-stat small {
+            display: block;
+            color: var(--text-tertiary);
+            font-size: 9px;
+        }
+
+        .pv-stat b {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .pv-chart {
+            height: 150px;
+        }
+
+        .pv-chart svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .pv-table {
+            border-top: 1px solid var(--border-secondary);
+            font-size: 10px;
+        }
+
+        .pv-row {
+            display: grid;
+            grid-template-columns: 2.4fr 1.3fr 1fr 1fr;
+
+            align-items: center;
+            gap: 8px;
+            padding: 9px 0;
+
+            border-bottom: 1px solid var(--border-secondary);
+            color: var(--text-tertiary);
+        }
+
+        .pv-row.head {
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .pv-row .t {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .pv-row .badge,
+        .pv-row .chip {
+            height: 17px;
+            padding: 0 6px;
+            font-size: 9px;
+        }
+
+        /* ==================================
+           RESPONSIVE DESIGN
+           ================================== */
+
+        @media (max-width: 1100px) {
+            .auth {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .auth-preview {
+                display: none;
+            }
+
+            .auth-form-side {
+                align-items: center;
+                padding: 32px 16px;
+            }
+
+            .auth-form-side > .brand,
+            .auth-footer {
+                width: 100%;
+                max-width: 360px;
+            }
+
+            .auth-body {
+                margin-top: 56px;
+            }
+
+            .auth-footer {
+                position: static;
+                margin-top: 32px;
             }
         }
+
     </style>
 </head>
 
 <body>
 
-    <div class="login-card">
+<div class="auth">
 
-        <div class="logo">🐛</div>
+    <!-- ================================== -->
+    <!-- FORM SIDE -->
+    <!-- ================================== -->
 
-        <h1>BugPilot AI</h1>
+    <section class="auth-form-side">
 
-        <p class="subtitle">
-            Software Bug Tracking System
-        </p>
+        <div class="brand">
+            <span class="brand-mark">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <ellipse
+                        cx="10"
+                        cy="11.5"
+                        rx="4.5"
+                        ry="5.5"
+                        fill="#7f56da"
+                    />
+                    <circle
+                        cx="10"
+                        cy="5"
+                        r="2.5"
+                        fill="#7f56da"
+                    />
+                    <path
+                        d="M10 7v10"
+                        stroke="#cecfd3"
+                        stroke-width="1.2"
+                    />
+                </svg>
+            </span>
 
-        <!-- ================================== -->
-        <!-- 1. LOGIN SECTION -->
-        <!-- ================================== -->
-
-        <div id="loginSection">
-
-            <form id="loginForm">
-
-                <label for="username">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    id="username"
-                    placeholder="Enter your username"
-                    autocomplete="username"
-                    maxlength="50"
-                    required
-                >
-
-                <label for="password">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Enter your password"
-                    autocomplete="current-password"
-                    required
-                >
-
-                <button
-                    class="login-btn"
-                    id="loginBtn"
-                    type="submit"
-                >
-                    Sign In
-                </button>
-
-            </form>
-
-            <div class="divider">OR</div>
-
-            <button
-                class="guest-btn"
-                id="guestBtn"
-                type="button"
-            >
-                Continue as Guest
-            </button>
-
-            <p class="signup-link">
-                Don't have an account?
-
-                <button
-                    class="text-link"
-                    id="showRegisterBtn"
-                    type="button"
-                >
-                    Create Account
-                </button>
-            </p>
-
+            <span>BugPilot AI</span>
         </div>
 
-        <!-- ================================== -->
-        <!-- 2. CREATE ACCOUNT SECTION -->
-        <!-- ================================== -->
+        <div class="auth-body">
 
-        <div
-            id="registerSection"
-            class="hidden"
-        >
+            <!-- ================================== -->
+            <!-- 1. LOGIN SECTION -->
+            <!-- ================================== -->
 
-            <form id="registerForm">
+            <div id="loginSection">
 
-                <label for="registerUsername">
-                    Username
-                </label>
+                <h1 class="auth-title">Log in</h1>
 
-                <input
-                    type="text"
-                    id="registerUsername"
-                    placeholder="Choose a username"
-                    autocomplete="username"
-                    minlength="3"
-                    maxlength="50"
-                    pattern="[A-Za-z0-9_.-]{3,50}"
-                    title="Use 3-50 letters, numbers, underscores, dots or hyphens."
-                    required
-                >
-
-                <label for="registerEmail">
-                    Email Address
-                </label>
-
-                <input
-                    type="email"
-                    id="registerEmail"
-                    placeholder="Enter your email"
-                    autocomplete="email"
-                    maxlength="254"
-                    required
-                >
-
-                <label for="registerPassword">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="registerPassword"
-                    placeholder="Create a password"
-                    autocomplete="new-password"
-                    minlength="8"
-                    required
-                >
-
-                <p class="password-hint">
-                    At least 8 characters.
+                <p class="auth-subtitle">
+                    Welcome back! Please enter your details.
                 </p>
 
-                <label for="confirmPassword">
-                    Confirm Password
-                </label>
+                <form id="loginForm" class="auth-form">
 
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    placeholder="Confirm your password"
-                    autocomplete="new-password"
-                    minlength="8"
-                    required
-                >
+                    <!-- USERNAME -->
 
-                <button
-                    class="login-btn"
-                    id="registerBtn"
-                    type="submit"
-                >
-                    Create Account
-                </button>
+                    <div class="field">
 
-            </form>
+                        <label class="label" for="username">
+                            Username
+                        </label>
 
-            <p class="signup-link">
-                Already have an account?
+                        <input
+                            class="input"
+                            type="text"
+                            id="username"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            maxlength="50"
+                            required
+                        >
 
-                <button
-                    class="text-link"
-                    id="showLoginBtn"
-                    type="button"
-                >
-                    Sign In
-                </button>
-            </p>
+                    </div>
+
+                    <!-- PASSWORD -->
+
+                    <div class="field">
+
+                        <label class="label" for="password">
+                            Password
+                        </label>
+
+                        <input
+                            class="input"
+                            type="password"
+                            id="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+                    <!-- LOGIN ACTIONS -->
+
+                    <div class="auth-actions">
+
+                        <!-- NORMAL LOGIN -->
+
+                        <button
+                            class="btn btn-primary btn-block"
+                            id="loginBtn"
+                            type="submit"
+                        >
+                            Sign in
+                        </button>
+
+                        <!-- ================================== -->
+                        <!-- NEW: GITHUB OAUTH LOGIN -->
+                        <!-- ================================== -->
+
+                        <a
+                            class="btn btn-block github-login-btn"
+                            id="githubLoginBtn"
+                            href="/api/auth/github"
+                            aria-label="Sign in with GitHub"
+                        >
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M12 .297a12 12 0 0 0-3.793 23.386c.6.111.82-.261.82-.577v-2.234c-3.338.726-4.043-1.416-4.043-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.304.762-1.604-2.665-.304-5.467-1.333-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.536-1.524.117-3.176 0 0 1.008-.323 3.301 1.23a11.52 11.52 0 0 1 6.006 0c2.291-1.553 3.298-1.23 3.298-1.23.654 1.652.243 2.873.12 3.176.77.84 1.235 1.91 1.235 3.221 0 4.61-2.807 5.624-5.479 5.921.43.372.824 1.102.824 2.222v3.293c0 .319.216.694.825.576A12.003 12.003 0 0 0 12 .297Z"
+                                />
+                            </svg>
+
+                            <span>Sign in with GitHub</span>
+
+                        </a>
+
+                        <!-- GUEST LOGIN -->
+
+                        <button
+                            class="btn btn-block"
+                            id="guestBtn"
+                            type="button"
+                        >
+                            Continue as guest
+                        </button>
+
+                    </div>
+
+                </form>
+
+                <!-- SWITCH TO REGISTRATION -->
+
+                <p class="auth-switch">
+
+                    Don't have an account?
+
+                    <button
+                        class="btn-link"
+                        id="showRegisterBtn"
+                        type="button"
+                    >
+                        Create account
+                    </button>
+
+                </p>
+
+            </div>
+
+            <!-- ================================== -->
+            <!-- 2. CREATE ACCOUNT SECTION -->
+            <!-- ================================== -->
+
+            <div
+                id="registerSection"
+                class="hidden"
+            >
+
+                <h1 class="auth-title">
+                    Create account
+                </h1>
+
+                <p class="auth-subtitle">
+                    Sign up to report and track bugs.
+                </p>
+
+                <form id="registerForm" class="auth-form">
+
+                    <!-- USERNAME -->
+
+                    <div class="field">
+
+                        <label
+                            class="label"
+                            for="registerUsername"
+                        >
+                            Username
+                        </label>
+
+                        <input
+                            class="input"
+                            type="text"
+                            id="registerUsername"
+                            placeholder="Choose a username"
+                            autocomplete="username"
+                            minlength="3"
+                            maxlength="50"
+                            pattern="[A-Za-z0-9_.-]{3,50}"
+                            title="Use 3-50 letters, numbers, underscores, dots or hyphens."
+                            required
+                        >
+
+                    </div>
+
+                    <!-- EMAIL -->
+
+                    <div class="field">
+
+                        <label
+                            class="label"
+                            for="registerEmail"
+                        >
+                            Email
+                        </label>
+
+                        <input
+                            class="input"
+                            type="email"
+                            id="registerEmail"
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                            maxlength="254"
+                            required
+                        >
+
+                    </div>
+
+                    <!-- PASSWORD -->
+
+                    <div class="field">
+
+                        <label
+                            class="label"
+                            for="registerPassword"
+                        >
+                            Password
+                        </label>
+
+                        <input
+                            class="input"
+                            type="password"
+                            id="registerPassword"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            aria-describedby="passwordHint"
+                            required
+                        >
+
+                        <p class="hint" id="passwordHint">
+                            Must be at least 8 characters.
+                        </p>
+
+                    </div>
+
+                    <!-- CONFIRM PASSWORD -->
+
+                    <div class="field">
+
+                        <label
+                            class="label"
+                            for="confirmPassword"
+                        >
+                            Confirm password
+                        </label>
+
+                        <input
+                            class="input"
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirm your password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                        >
+
+                    </div>
+
+                    <!-- CREATE ACCOUNT -->
+
+                    <div class="auth-actions">
+
+                        <button
+                            class="btn btn-primary btn-block"
+                            id="registerBtn"
+                            type="submit"
+                        >
+                            Create account
+                        </button>
+
+                    </div>
+
+                </form>
+
+                <!-- RETURN TO LOGIN -->
+
+                <p class="auth-switch">
+
+                    Already have an account?
+
+                    <button
+                        class="btn-link"
+                        id="showLoginBtn"
+                        type="button"
+                    >
+                        Log in
+                    </button>
+
+                </p>
+
+            </div>
+
+            <!-- ================================== -->
+            <!-- 3. STATUS MESSAGE -->
+            <!-- ================================== -->
+
+            <p
+                id="message"
+                role="status"
+                aria-live="polite"
+            ></p>
 
         </div>
 
-        <!-- ================================== -->
-        <!-- 3. STATUS MESSAGE -->
-        <!-- ================================== -->
+        <p class="auth-footer">
+            © BugPilot AI
+        </p>
 
-        <p
-            id="message"
-            role="status"
-            aria-live="polite"
-        ></p>
+    </section>
 
-    </div>
+    <!-- ================================== -->
+    <!-- PRODUCT PREVIEW -->
+    <!-- Decorative dashboard mockup -->
+    <!-- ================================== -->
 
-    <script>
+    <section
+        class="auth-preview"
+        aria-hidden="true"
+    >
 
-        // ==================================
-        // 1. ELEMENT REFERENCES
-        // ==================================
+        <div class="preview-frame">
 
-        const loginSection =
-            document.getElementById("loginSection");
+            <!-- PREVIEW SIDEBAR -->
 
-        const registerSection =
-            document.getElementById("registerSection");
+            <div class="pv-side">
 
-        const loginForm =
-            document.getElementById("loginForm");
+                <div class="brand">
 
-        const registerForm =
-            document.getElementById("registerForm");
+                    <span class="brand-mark">
 
-        const message =
-            document.getElementById("message");
+                        <svg viewBox="0 0 20 20">
 
-        const loginBtn =
-            document.getElementById("loginBtn");
+                            <ellipse
+                                cx="10"
+                                cy="11.5"
+                                rx="4.5"
+                                ry="5.5"
+                                fill="#7f56da"
+                            />
 
-        const registerBtn =
-            document.getElementById("registerBtn");
+                            <circle
+                                cx="10"
+                                cy="5"
+                                r="2.5"
+                                fill="#7f56da"
+                            />
 
-        const guestBtn =
-            document.getElementById("guestBtn");
+                        </svg>
 
-        // ==================================
-        // 2. STATUS MESSAGE HELPER
-        // ==================================
+                    </span>
 
-        function showMessage(text, type = "error") {
+                    <span>BugPilot AI</span>
 
-            message.textContent = text;
+                </div>
 
-            if (type === "success") {
-                message.style.color = "#4ade80";
-            } else if (type === "info") {
-                message.style.color = "#93c5fd";
-            } else {
-                message.style.color = "#f87171";
-            }
+                <!-- DASHBOARD -->
+
+                <div class="pv-nav on">
+
+                    <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.67"
+                    >
+                        <rect x="3" y="3" width="6" height="8" rx="1.5"/>
+                        <rect x="11" y="3" width="6" height="5" rx="1.5"/>
+                        <rect x="11" y="10" width="6" height="7" rx="1.5"/>
+                        <rect x="3" y="13" width="6" height="4" rx="1.5"/>
+                    </svg>
+
+                    Dashboard
+
+                </div>
+
+                <!-- REPORTS -->
+
+                <div class="pv-nav">
+
+                    <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.67"
+                    >
+                        <path d="M10 2.5a7.5 7.5 0 1 0 7.5 7.5H10z"/>
+                        <path d="M12.5 2.9a7.5 7.5 0 0 1 4.6 4.6h-4.6z"/>
+                    </svg>
+
+                    Reports
+
+                </div>
+
+                <!-- MOCK USER -->
+
+                <div class="pv-user">
+                    <span class="avatar">BP</span>
+                    <span>Team member</span>
+                </div>
+
+            </div>
+
+            <!-- PREVIEW MAIN AREA -->
+
+            <div class="pv-main">
+
+                <div class="pv-title">
+                    Dashboard
+                </div>
+
+                <!-- PREVIEW STATS -->
+
+                <div class="pv-stats">
+
+                    <div class="pv-stat sel">
+                        <small>Total issues</small>
+                        <b>128</b>
+                    </div>
+
+                    <div class="pv-stat">
+                        <small>Open issues</small>
+                        <b>42</b>
+                    </div>
+
+                    <div class="pv-stat">
+                        <small>Critical issues</small>
+                        <b>7</b>
+                    </div>
+
+                </div>
+
+                <!-- PREVIEW CHART -->
+
+                <div class="pv-chart">
+
+                    <svg
+                        viewBox="0 0 600 150"
+                        preserveAspectRatio="none"
+                    >
+
+                        <g
+                            stroke="#1f1f1f"
+                            stroke-width="1"
+                        >
+                            <line x1="0" y1="20" x2="600" y2="20"/>
+                            <line x1="0" y1="60" x2="600" y2="60"/>
+                            <line x1="0" y1="100" x2="600" y2="100"/>
+                            <line x1="0" y1="140" x2="600" y2="140"/>
+                        </g>
+
+                        <polyline
+                            fill="none"
+                            stroke="#ab9dca"
+                            stroke-width="2"
+                            points="0,95 55,90 110,88 165,84 220,93 275,86 330,90 385,66 440,62 495,66 550,62 600,55"
+                        />
+
+                        <polyline
+                            fill="none"
+                            stroke="#7f56da"
+                            stroke-width="2"
+                            stroke-dasharray="2 5"
+                            points="0,118 55,117 110,116 165,115 220,124 275,113 330,116 385,101 440,108 495,112 550,108 600,106"
+                        />
+
+                    </svg>
+
+                </div>
+
+                <!-- PREVIEW TABLE -->
+
+                <div class="pv-table">
+
+                    <div class="pv-row head">
+                        <span>Issue</span>
+                        <span>Project</span>
+                        <span>Severity</span>
+                        <span>Status</span>
+                    </div>
+
+                    <div class="pv-row">
+
+                        <span class="t">
+                            Payment fails on retry
+                        </span>
+
+                        <span>
+                            <span class="chip">
+                                Checkout
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge sev sev-critical">
+                                Critical
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge status-open">
+                                <span class="dot"></span>
+                                Open
+                            </span>
+                        </span>
+
+                    </div>
+
+                    <div class="pv-row">
+
+                        <span class="t">
+                            Crash on rotate
+                        </span>
+
+                        <span>
+                            <span class="chip">
+                                Mobile App
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge sev sev-high">
+                                High
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge status-in-progress">
+                                <span class="dot"></span>
+                                In Progress
+                            </span>
+                        </span>
+
+                    </div>
+
+                    <div class="pv-row">
+
+                        <span class="t">
+                            Refunds double-counted
+                        </span>
+
+                        <span>
+                            <span class="chip">
+                                Analytics
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge sev sev-medium">
+                                Medium
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge status-resolved">
+                                <span class="dot"></span>
+                                Resolved
+                            </span>
+                        </span>
+
+                    </div>
+
+                    <div class="pv-row">
+
+                        <span class="t">
+                            Reset email missing
+                        </span>
+
+                        <span>
+                            <span class="chip">
+                                Portal
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge sev sev-low">
+                                Low
+                            </span>
+                        </span>
+
+                        <span>
+                            <span class="badge status-closed">
+                                <span class="dot"></span>
+                                Closed
+                            </span>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+
+    // ==========================================
+    // 1. ELEMENT REFERENCES
+    // ==========================================
+
+    const loginSection =
+        document.getElementById("loginSection");
+
+    const registerSection =
+        document.getElementById("registerSection");
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const registerForm =
+        document.getElementById("registerForm");
+
+    const message =
+        document.getElementById("message");
+
+    const loginBtn =
+        document.getElementById("loginBtn");
+
+    const registerBtn =
+        document.getElementById("registerBtn");
+
+    const guestBtn =
+        document.getElementById("guestBtn");
+
+    // ==========================================
+    // 2. STATUS MESSAGE HELPER
+    // ==========================================
+
+    function showMessage(text, type = "error") {
+
+        message.textContent = text;
+
+        if (type === "success") {
+            message.style.color = "var(--success-text)";
+        } else if (type === "info") {
+            message.style.color = "var(--text-tertiary)";
+        } else {
+            message.style.color = "var(--sev-critical)";
         }
+    }
 
-        function clearMessage() {
-            message.textContent = "";
-        }
+    function clearMessage() {
+        message.textContent = "";
+    }
 
-        // ==================================
-        // 3. SWITCH TO REGISTRATION
-        // ==================================
+    // ==========================================
+    // 3. GITHUB OAUTH ERROR HANDLING
+    // ==========================================
 
-        function showRegister() {
+    // GitHub OAuth returns to /login with an error
+    // parameter if authorization fails or is cancelled.
 
-            loginSection.classList.add("hidden");
+    const githubError =
+        new URLSearchParams(window.location.search)
+            .get("github_error");
 
-            registerSection.classList.remove("hidden");
+    if (githubError) {
 
-            document.title = "BugPilot AI - Create Account";
+        const githubErrorMessages = {
+            denied:
+                "GitHub authorization was cancelled.",
 
-            clearMessage();
+            state:
+                "GitHub sign-in expired or could not be verified. Please try again.",
 
-            document.getElementById(
-                "registerUsername"
-            ).focus();
-        }
+            scope:
+                "GitHub returned unexpected permissions. Sign-in was cancelled.",
 
-        document.getElementById("showRegisterBtn")
-            .addEventListener("click", showRegister);
+            disabled:
+                "This BugPilot account is disabled.",
 
-        // ==================================
-        // 4. SWITCH TO LOGIN
-        // ==================================
+            configuration:
+                "GitHub login is not configured correctly.",
 
-        function showLogin() {
+            token:
+                "GitHub could not complete sign-in. Please try again.",
 
-            registerSection.classList.add("hidden");
+            profile:
+                "Unable to verify your GitHub profile.",
 
-            loginSection.classList.remove("hidden");
+            code:
+                "GitHub did not return a valid authorization code.",
 
-            document.title = "BugPilot AI - Login";
+            account:
+                "Could not create the BugPilot account for GitHub.",
 
-            clearMessage();
+            failed:
+                "GitHub sign-in failed. Please try again."
+        };
 
-            document.getElementById(
-                "username"
-            ).focus();
-        }
-
-        document.getElementById("showLoginBtn")
-            .addEventListener("click", showLogin);
-
-        // ==================================
-        // 5. LOGIN
-        // POST /api/auth/login
-        // ==================================
-
-        loginForm.addEventListener(
-            "submit",
-            async (event) => {
-
-                event.preventDefault();
-
-                const username =
-                    document.getElementById(
-                        "username"
-                    ).value.trim();
-
-                const password =
-                    document.getElementById(
-                        "password"
-                    ).value;
-
-                showMessage("Signing in...", "info");
-
-                loginBtn.disabled = true;
-
-                try {
-
-                    const response = await fetch(
-                        "/api/auth/login",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-                                username,
-                                password
-                            })
-                        }
-                    );
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(
-                            result.message || "Login failed."
-                        );
-                    }
-
-                    showMessage(
-                        "Login successful! Redirecting...",
-                        "success"
-                    );
-
-                    window.location.href = "/";
-
-                } catch (error) {
-
-                    showMessage(
-                        error.message || "Login failed.",
-                        "error"
-                    );
-
-                } finally {
-
-                    loginBtn.disabled = false;
-
-                }
-            }
+        showMessage(
+            githubErrorMessages[githubError] ||
+            githubErrorMessages.failed
         );
+    }
 
-        // ==================================
-        // 6. REGISTER ACCOUNT
-        // POST /api/auth/register
-        // ==================================
+    // ==========================================
+    // 4. SWITCH TO REGISTRATION
+    // ==========================================
 
-        registerForm.addEventListener(
-            "submit",
-            async (event) => {
+    function showRegister() {
 
-                event.preventDefault();
+        loginSection.classList.add("hidden");
 
-                const username =
-                    document.getElementById(
-                        "registerUsername"
-                    ).value.trim();
+        registerSection.classList.remove("hidden");
 
-                const email =
-                    document.getElementById(
-                        "registerEmail"
-                    ).value.trim();
+        document.title =
+            "BugPilot AI - Create Account";
 
-                const password =
-                    document.getElementById(
-                        "registerPassword"
-                    ).value;
+        clearMessage();
 
-                const confirmPassword =
-                    document.getElementById(
-                        "confirmPassword"
-                    ).value;
+        document.getElementById(
+            "registerUsername"
+        ).focus();
+    }
 
-                // Check password confirmation
-                if (password !== confirmPassword) {
+    document.getElementById("showRegisterBtn")
+        .addEventListener("click", showRegister);
 
-                    showMessage(
-                        "Passwords do not match.",
-                        "error"
+    // ==========================================
+    // 5. SWITCH TO LOGIN
+    // ==========================================
+
+    function showLogin() {
+
+        registerSection.classList.add("hidden");
+
+        loginSection.classList.remove("hidden");
+
+        document.title =
+            "BugPilot AI - Login";
+
+        clearMessage();
+
+        document.getElementById(
+            "username"
+        ).focus();
+    }
+
+    document.getElementById("showLoginBtn")
+        .addEventListener("click", showLogin);
+
+    // ==========================================
+    // 6. NORMAL LOGIN
+    // POST /api/auth/login
+    // ==========================================
+
+    loginForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const username =
+                document.getElementById(
+                    "username"
+                ).value.trim();
+
+            const password =
+                document.getElementById(
+                    "password"
+                ).value;
+
+            showMessage(
+                "Signing in...",
+                "info"
+            );
+
+            loginBtn.disabled = true;
+
+            try {
+
+                const response = await fetch(
+                    "/api/auth/login",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            username,
+                            password
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.message ||
+                        "Login failed."
                     );
-
-                    return;
-                }
-
-                // Match the backend's bcrypt input limit
-                if (
-                    new TextEncoder().encode(password).length > 72
-                ) {
-                    showMessage(
-                        "Password cannot exceed 72 UTF-8 bytes.",
-                        "error"
-                    );
-
-                    return;
                 }
 
                 showMessage(
-                    "Creating your account...",
-                    "info"
+                    "Login successful! Redirecting...",
+                    "success"
                 );
 
-                registerBtn.disabled = true;
+                window.location.href = "/";
 
-                try {
-
-                    const response = await fetch(
-                        "/api/auth/register",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-                                username,
-                                email,
-                                password,
-                                confirmPassword
-                            })
-                        }
-                    );
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-
-                        throw new Error(
-                            result.message ||
-                            "Account creation failed."
-                        );
-                    }
-
-                    // Registration succeeded
-                    registerForm.reset();
-
-                    // Fill in new username on login form
-                    document.getElementById(
-                        "username"
-                    ).value = username;
-
-                    // Return to login view
-                    showLogin();
-
-                    showMessage(
-                        "Account created successfully! Please sign in.",
-                        "success"
-                    );
-
-                } catch (error) {
-
-                    showMessage(
-                        error.message ||
-                        "Account creation failed.",
-                        "error"
-                    );
-
-                } finally {
-
-                    registerBtn.disabled = false;
-
-                }
-            }
-        );
-
-        // ==================================
-        // 7. GUEST LOGIN
-        // POST /api/auth/guest
-        // ==================================
-
-        guestBtn.addEventListener(
-            "click",
-            async () => {
+            } catch (error) {
 
                 showMessage(
-                    "Entering guest mode...",
-                    "info"
+                    error.message ||
+                    "Login failed.",
+                    "error"
                 );
 
-                guestBtn.disabled = true;
+            } finally {
 
-                try {
+                loginBtn.disabled = false;
 
-                    const response = await fetch(
-                        "/api/auth/guest",
-                        {
-                            method: "POST"
-                        }
-                    );
-
-                    if (!response.ok) {
-                        throw new Error(
-                            "Guest login failed."
-                        );
-                    }
-
-                    window.location.href = "/";
-
-                } catch (error) {
-
-                    showMessage(
-                        error.message ||
-                        "Guest login failed.",
-                        "error"
-                    );
-
-                } finally {
-
-                    guestBtn.disabled = false;
-
-                }
             }
-        );
+        }
+    );
 
-    </script>
+    // ==========================================
+    // 7. GITHUB LOGIN
+    // GET /api/auth/github
+    // ==========================================
+
+    // No fetch() required here.
+    //
+    // The GitHub button is a normal <a> link.
+    //
+    // Clicking it navigates the browser to
+    // /api/auth/github, which starts GitHub OAuth.
+    //
+    // GitHub then redirects back through
+    // /api/auth/github/callback.
+
+    // ==========================================
+    // 8. REGISTER ACCOUNT
+    // POST /api/auth/register
+    // ==========================================
+
+    registerForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const username =
+                document.getElementById(
+                    "registerUsername"
+                ).value.trim();
+
+            const email =
+                document.getElementById(
+                    "registerEmail"
+                ).value.trim();
+
+            const password =
+                document.getElementById(
+                    "registerPassword"
+                ).value;
+
+            const confirmPassword =
+                document.getElementById(
+                    "confirmPassword"
+                ).value;
+
+            // Validate confirmation
+
+            if (password !== confirmPassword) {
+
+                showMessage(
+                    "Passwords do not match.",
+                    "error"
+                );
+
+                return;
+            }
+
+            // Match backend password byte limit
+
+            if (
+                new TextEncoder()
+                    .encode(password).length > 72
+            ) {
+
+                showMessage(
+                    "Password cannot exceed 72 UTF-8 bytes.",
+                    "error"
+                );
+
+                return;
+            }
+
+            showMessage(
+                "Creating your account...",
+                "info"
+            );
+
+            registerBtn.disabled = true;
+
+            try {
+
+                const response = await fetch(
+                    "/api/auth/register",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            username,
+                            email,
+                            password,
+                            confirmPassword
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        result.message ||
+                        "Account creation failed."
+                    );
+                }
+
+                registerForm.reset();
+
+                document.getElementById(
+                    "username"
+                ).value = username;
+
+                showLogin();
+
+                showMessage(
+                    "Account created successfully! Please sign in.",
+                    "success"
+                );
+
+            } catch (error) {
+
+                showMessage(
+                    error.message ||
+                    "Account creation failed.",
+                    "error"
+                );
+
+            } finally {
+
+                registerBtn.disabled = false;
+
+            }
+        }
+    );
+
+    // ==========================================
+    // 9. GUEST LOGIN
+    // POST /api/auth/guest
+    // ==========================================
+
+    guestBtn.addEventListener(
+        "click",
+        async () => {
+
+            showMessage(
+                "Entering guest mode...",
+                "info"
+            );
+
+            guestBtn.disabled = true;
+
+            try {
+
+                const response = await fetch(
+                    "/api/auth/guest",
+                    {
+                        method: "POST"
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Guest login failed."
+                    );
+                }
+
+                window.location.href = "/";
+
+            } catch (error) {
+
+                showMessage(
+                    error.message ||
+                    "Guest login failed.",
+                    "error"
+                );
+
+            } finally {
+
+                guestBtn.disabled = false;
+
+            }
+        }
+    );
+
+</script>
 
 </body>
-
 </html>
