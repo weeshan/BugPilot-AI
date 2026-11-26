@@ -1,4 +1,3 @@
-
 # 🐛 BugPilot AI
 
 **BugPilot AI** is a full-stack bug and issue tracking platform that allows development teams to view and manage software bugs across multiple projects in one place.
@@ -11,47 +10,91 @@ Built as a database management project at **Ontario Tech University**.
 
 - **Centralized Bug Tracking** — View issues across multiple projects.
 - **Team Collaboration** — Shared dashboards for tracking reported bugs.
-- **GitHub Integration** — Sign in with GitHub and import issues from public repositories.
-- **Issue Synchronization** — Import open GitHub issues and remove their local copies when closed.
+- **GitHub Authentication** — Sign in using your GitHub account.
+- **GitHub Integration** — Import issues from public GitHub repositories.
+- **GitHub Usernames** — Display the original GitHub username of each imported issue's author.
+- **GitHub Profile Links** — Access issue authors' GitHub profiles directly.
+- **Issue Synchronization** — Import open GitHub issues and remove their local copies when detected as closed.
+- **Duplicate Prevention** — Update previously imported GitHub issues instead of creating duplicates.
 - **Role-Based Access** — Admin, User, and Guest permissions.
 - **Analytics Dashboard** — Visualize issue statistics and project activity.
 - **SQL Reports** — Search, filter, and export reports as CSV or PDF.
-- **REST API** — Full CRUD operations for issues and projects.
+- **REST API** — CRUD operations for issues and projects.
+- **Rate Limiting** — Protect GitHub import endpoints from excessive requests.
+- **Startup Script** — Launch BugPilot AI using a shell script.
 
 ## 🛠️ Tech Stack
 
-**Frontend:** HTML, CSS, JavaScript, Chart.js  
-**Backend:** Node.js, Express.js  
-**Database:** MySQL  
-**Authentication:** Express Sessions, bcrypt, GitHub OAuth  
-**API:** GitHub REST API
+| Component | Technology |
+|---|---|
+| Frontend | HTML, CSS, JavaScript, Chart.js |
+| Backend | Node.js, Express.js |
+| Database | MySQL |
+| Authentication | Express Sessions, bcrypt, GitHub OAuth |
+| External API | GitHub REST API |
+| Data Export | CSV, PDF |
+| Version Control | Git, GitHub |
+
+## 📋 Prerequisites
+
+Before running BugPilot AI, ensure you have installed:
+
+- Node.js 18 or newer
+- npm
+- MySQL Server
+- MySQL Workbench
+- Git
+- Bash (for the startup script)
 
 ## 🚀 Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
-cd BugPilot-AI-V2/backend
+git clone https://github.com/weeshan/BugPilot-AI.git
+cd BugPilot-AI
 ```
 
 ### 2. Install Dependencies
 
 ```bash
+cd backend
 npm ci
+cd ..
 ```
 
 ### 3. Set Up MySQL
 
-Start your MySQL server and import the project's database schema and sample data using MySQL Workbench.
+Start your MySQL server and open MySQL Workbench.
+
+Import the project's complete SQL database setup file located in the `database/` directory.
 
 The database name is:
 
-`bug_tracking_phase2`
+```sql
+bug_tracking_phase2
+```
+
+The database includes:
+
+- 7 original Phase II tables
+- 2 Phase III tables
+- 88 fictional sample records
+- 10 SQL reporting views
+- GitHub authentication fields
+- GitHub imported issue author usernames
+- Unique GitHub account constraints
+- Database migration commands
+
+For a new installation, execute the complete SQL setup file.
+
+For an existing installation, execute only the required migration section.
+
+**Do not execute the complete database setup repeatedly on an existing populated database, as this may cause duplicate primary key errors.**
 
 ### 4. Configure Environment Variables
 
-Create a `.env` file inside `backend/`:
+Create a `.env` file inside the `backend/` directory:
 
 ```env
 PORT=3000
@@ -70,39 +113,246 @@ GITHUB_CLIENT_SECRET=your_github_client_secret
 GITHUB_CALLBACK_URL=http://localhost:3000/api/auth/github/callback
 ```
 
-For GitHub sign-in, configure a GitHub OAuth App with the same callback URL.
+The session secret must contain at least 32 characters.
 
-**Never upload your `.env` file or credentials to GitHub.**
-
-### 5. Run BugPilot AI
+You can generate a secure session secret using:
 
 ```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+For GitHub sign-in, configure a GitHub OAuth App with the following settings:
+
+**Homepage URL:**
+
+```text
+http://localhost:3000
+```
+
+**Authorization callback URL:**
+
+```text
+http://localhost:3000/api/auth/github/callback
+```
+
+GitHub OAuth Apps can be configured at:
+
+https://github.com/settings/developers
+
+**Never upload your `.env` file, database passwords, session secrets, or GitHub credentials to GitHub.**
+
+## ▶️ Running BugPilot AI
+
+There are two ways to start the application.
+
+### Option 1 — Startup Script (Recommended)
+
+From the root directory of the project, run:
+
+```bash
+bash start-bugpilot.sh
+```
+
+Alternatively, grant execution permission to the startup script:
+
+```bash
+chmod +x start-bugpilot.sh
+./start-bugpilot.sh
+```
+
+Make sure MySQL is running and the database and environment variables have already been configured.
+
+### Option 2 — Manual Startup
+
+From the root directory of the project, run:
+
+```bash
+cd backend
 node server.js
 ```
 
-Open **http://localhost:3000** in your browser.
+When the backend starts successfully, the terminal should display:
+
+```text
+MySQL connection successful!
+Session store ready!
+BugPilot AI running at http://localhost:3000
+```
+
+Open the following URL in your browser:
+
+**http://localhost:3000**
+
+To stop the server, press:
+
+```text
+Ctrl + C
+```
+
+## 👤 Creating a User
+
+Users can create an account through the BugPilot AI registration page.
+
+GitHub authentication is also supported.
+
+To manually provision a user account, run the following command from the project root:
+
+```bash
+cd backend
+node create-user.js
+```
+
+Follow the script's account configuration instructions.
 
 ## 👥 User Roles
 
 | Role | Permissions |
 |---|---|
-| Admin | Manage users, projects, and issues; delete records |
-| User | View, create, and update issues; access GitHub imports |
+| Admin | Manage users, projects, and issues; delete records; access reporting and GitHub imports |
+| User | View, create, and update issues; access reports and GitHub imports |
 | Guest | Limited read-only access |
+
+Protected backend routes enforce role-based permissions.
 
 ## 🔗 GitHub Integration
 
-Enter a public GitHub repository's owner and name to import its open issues into BugPilot AI.
+BugPilot AI integrates with the GitHub REST API to retrieve public repository issues.
 
-When an issue is closed on GitHub, its imported database record is deleted during the next manual synchronization.
+### Importing GitHub Issues
 
-Only public repositories are supported.
+1. Sign in as an Admin or User.
+2. Navigate to the GitHub Issues page.
+3. Enter the GitHub repository owner.
+4. Enter the repository name.
+5. Click **Import Issues**.
+6. View the imported issues in the dashboard.
+
+### Imported Issue Information
+
+Each imported issue includes:
+
+- Repository owner
+- Repository name
+- GitHub issue number
+- Issue title
+- Original GitHub author's username
+- Issue description
+- Issue state
+- GitHub issue URL
+- Creation timestamp
+- Update timestamp
+- Import timestamp
+
+The imported issue author's username is displayed beside the issue title.
+
+Clicking a supported username opens the author's GitHub profile.
+
+### Issue Synchronization
+
+When a repository is imported again:
+
+- New open issues are inserted into MySQL.
+- Previously imported issues are updated.
+- GitHub author usernames are synchronized.
+- Duplicate issues are prevented.
+- Detected closed issues are deleted from the imported issues table.
+- Pull requests are excluded.
+
+Each import checks up to 100 recently updated GitHub issues.
+
+Only public GitHub repositories are supported.
+
+## 📊 Database and Reporting
+
+BugPilot AI uses a relational MySQL database to manage:
+
+- Developers
+- Projects
+- Issues
+- Solutions
+- Documents
+- Issue documentation
+- Developer assignments
+- Application users
+- Imported GitHub issues
+
+The system includes 10 SQL reporting views:
+
+1. Issue Details
+2. Projects Above Average Issue Count
+3. Developers With Solutions
+4. Projects and Documents
+5. Active Developers
+6. Urgent Issues
+7. Accepted Solutions
+8. Developer Workload
+9. Issue Documentation
+10. Project Issue Statistics
+
+Reports can be viewed through the reporting dashboard and exported as CSV or PDF.
+
+## 🔒 Security
+
+BugPilot AI implements:
+
+- Password hashing using bcrypt
+- MySQL-backed session storage
+- Role-based access control
+- Protected backend API endpoints
+- Parameterized SQL queries
+- Frontend and backend input validation
+- GitHub OAuth authentication
+- API rate limiting
+- Environment-based credential management
+- Public repository validation
+- MySQL transactions during GitHub synchronization
+
+## 📁 Project Structure
+
+```text
+BugPilot-AI/
+│
+├── backend/
+│   ├── middleware/
+│   ├── public/
+│   │   ├── css/
+│   │   ├── js/
+│   │   ├── index.html
+│   │   ├── login.html
+│   │   ├── reports.html
+│   │   └── github.html
+│   │
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── github.js
+│   │   ├── issues.js
+│   │   ├── projects.js
+│   │   ├── views.js
+│   │   └── pdf.js
+│   │
+│   ├── db.js
+│   ├── server.js
+│   ├── create-user.js
+│   ├── package.json
+│   ├── package-lock.json
+│   └── .env
+│
+├── database/
+├── .gitignore
+├── README.md
+└── start-bugpilot.sh
+```
+
+The `.env` file must be created locally and must not be committed to GitHub.
 
 ## 📌 Project Information
 
+**Project:** BugPilot AI V2  
 **Course:** SOFE 3700U — Data Management Systems  
 **University:** Ontario Tech University  
-**GitHub:** [@weeshan](https://github.com/weeshan)
+**Project Phase:** Phase III  
+**GitHub:** [@weeshan](https://github.com/weeshan)  
+**Repository:** [BugPilot AI](https://github.com/weeshan/BugPilot-AI)
 
 ---
 
