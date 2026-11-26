@@ -2,7 +2,9 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1"
@@ -11,325 +13,380 @@
     <title>GitHub Issues | BugPilot AI</title>
 
     <link rel="stylesheet" href="/css/app.css">
-<script src="/js/layout.js"></script>
 
+    <script src="/js/layout.js"></script>
 
-<style>
-.github-page {
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-}
+    <style>
 
-.github-page .subtitle {
-    color: var(--text-tertiary, #999);
-    margin: 0 0 25px;
-    font-size: 14px;
-}
+        .github-page {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
 
-.github-page .card {
-    background: var(--bg-primary, #111113);
-    border: 1px solid var(--border-card, #292929);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-}
+        .github-page .subtitle {
+            color: var(--text-tertiary, #999);
+            margin: 0 0 25px;
+            font-size: 14px;
+        }
 
-.github-page h2 {
-    font-size: 19px;
-    margin: 0;
-}
+        .github-page .card {
+            background: var(--bg-primary, #111113);
+            border: 1px solid var(--border-card, #292929);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
 
-.github-page .card-description {
-    color: var(--text-tertiary, #999);
-    margin: 10px 0 24px;
-    font-size: 14px;
-}
+        .github-page h2 {
+            font-size: 19px;
+            margin: 0;
+        }
 
-.github-page .form {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-    gap: 16px;
-    align-items: end;
-}
+        .github-page .card-description {
+            color: var(--text-tertiary, #999);
+            margin: 10px 0 24px;
+            font-size: 14px;
+        }
 
-.github-page .field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-}
+        .github-page .form {
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(0, 1fr)
+                auto;
+            gap: 16px;
+            align-items: end;
+        }
 
-.github-page label {
-    font-size: 13px;
-    font-weight: 600;
-}
+        .github-page .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
 
-.github-page input {
-    width: 100%;
-    min-width: 0;
-    height: 44px;
-    background: var(--bg-primary, #101016);
-    border: 1px solid var(--border-primary, #393944);
-    border-radius: 8px;
-    color: var(--text-primary, white);
-    padding: 10px 12px;
-    font: inherit;
-}
+        .github-page label {
+            font-size: 13px;
+            font-weight: 600;
+        }
 
-.github-page input:focus {
-    outline: 2px solid #7f56da;
-}
+        .github-page input {
+            width: 100%;
+            min-width: 0;
+            height: 44px;
+            background: var(--bg-primary, #101016);
+            border: 1px solid var(--border-primary, #393944);
+            border-radius: 8px;
+            color: var(--text-primary, white);
+            padding: 10px 12px;
+            font: inherit;
+        }
 
-.github-page button {
-    min-height: 44px;
-    background: #7f56da;
-    color: white;
-    border: 0;
-    border-radius: 8px;
-    padding: 10px 16px;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-}
+        .github-page input:focus {
+            outline: 2px solid #7f56da;
+        }
 
-.github-page button:hover {
-    background: #9169e3;
-}
+        .github-page button {
+            min-height: 44px;
+            background: #7f56da;
+            color: white;
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
 
-.github-page button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
+        .github-page button:hover {
+            background: #9169e3;
+        }
 
-.github-page .secondary {
-    background: #292935;
-}
+        .github-page button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
 
-.github-page .secondary:hover {
-    background: #393947;
-}
+        .github-page .secondary {
+            background: #292935;
+        }
 
-.github-page .status {
-    min-height: 20px;
-    margin-top: 16px;
-    color: var(--text-tertiary, #aaa);
-}
+        .github-page .secondary:hover {
+            background: #393947;
+        }
 
-.github-page .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-}
+        .github-page .status {
+            min-height: 20px;
+            margin-top: 16px;
+            color: var(--text-tertiary, #aaa);
+        }
 
-.github-page .count {
-    color: var(--text-tertiary, #999);
-    margin: 8px 0 0;
-    font-size: 13px;
-}
+        .github-page .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-.github-page .table-wrap {
-    overflow-x: auto;
-}
+        .github-page .count {
+            color: var(--text-tertiary, #999);
+            margin: 8px 0 0;
+            font-size: 13px;
+        }
 
-.github-page table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
+        .github-page .table-wrap {
+            overflow-x: auto;
+        }
 
-.github-page th,
-.github-page td {
-    padding: 14px 12px;
-    border-bottom: 1px solid var(--border-secondary, #292929);
-    font-size: 13px;
-    vertical-align: middle;
-}
+        .github-page table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
 
-.github-page th {
-    color: var(--text-tertiary, #aaa);
-}
+        .github-page th,
+        .github-page td {
+            padding: 14px 12px;
+            border-bottom: 1px solid
+                var(--border-secondary, #292929);
+            font-size: 13px;
+            vertical-align: middle;
+        }
 
-.github-page td {
-    color: var(--text-primary, #ddd);
-    overflow-wrap: anywhere;
-}
+        .github-page th {
+            color: var(--text-tertiary, #aaa);
+        }
 
-.github-page td a {
-    color: #ab9dca;
-    text-decoration: none;
-}
+        .github-page td {
+            color: var(--text-primary, #ddd);
+            overflow-wrap: anywhere;
+        }
 
-.github-page td a:hover {
-    text-decoration: underline;
-}
+        .github-page td a {
+            color: #ab9dca;
+            text-decoration: none;
+        }
 
-.github-page .state {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
+        .github-page td a:hover {
+            text-decoration: underline;
+        }
 
-.github-page .state.open {
-    background: #153b2b;
-    color: #86efac;
-}
+        /* ==========================================
+           GITHUB USERNAME STYLING
+           ========================================== */
 
-.github-page .state.closed {
-    background: #39245c;
-    color: #c4b5fd;
-}
+        .github-page .github-username {
+            color: #ab9dca;
+            font-weight: 600;
+            white-space: nowrap;
+        }
 
-.github-page .empty {
-    padding: 30px;
-    text-align: center;
-    color: var(--text-tertiary, #999);
-}
+        .github-page .unknown-user {
+            color: var(--text-tertiary, #999);
+            font-size: 12px;
+        }
 
-@media (max-width: 760px) {
-    .github-page .form {
-        grid-template-columns: 1fr;
-    }
+        .github-page .state {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
 
-    .github-page .card {
-        padding: 16px;
-    }
-}
-</style>
+        .github-page .state.open {
+            background: #153b2b;
+            color: #86efac;
+        }
+
+        .github-page .state.closed {
+            background: #39245c;
+            color: #c4b5fd;
+        }
+
+        .github-page .state.unknown {
+            background: #292935;
+            color: #aaa;
+        }
+
+        .github-page .empty {
+            padding: 30px;
+            text-align: center;
+            color: var(--text-tertiary, #999);
+        }
+
+        @media (max-width: 760px) {
+
+            .github-page .form {
+                grid-template-columns: 1fr;
+            }
+
+            .github-page .card {
+                padding: 16px;
+            }
+
+        }
+
+    </style>
 
 </head>
 
 <body>
 
-    <!-- NAVIGATION -->
-<main id="app-content"><div class="github-page">
+    <!-- ==========================================
+         SHARED APPLICATION LAYOUT
+         ========================================== -->
 
+    <main id="app-content">
 
+        <div class="github-page">
 
-        <p class="subtitle">
-            Import public GitHub repository issues into your
-            BugPilot AI MySQL database.
-            <span id="currentUser"></span>
-        </p>
+            <p class="subtitle">
 
-        <!-- IMPORT SECTION -->
+                Import public GitHub repository issues into your
+                BugPilot AI MySQL database.
 
-        <section class="card">
+                <span id="currentUser"></span>
 
-            <h2>Import Issues</h2>
-
-            <p class="card-description">
-                Enter a public repository to retrieve its issues
-                from the GitHub REST API.
             </p>
 
-            <form id="importForm" class="form">
+            <!-- ==========================================
+                 IMPORT SECTION
+                 ========================================== -->
 
-                <div class="field">
+            <section class="card">
 
-                    <label for="owner">
-                        Repository owner
-                    </label>
+                <h2>Import Issues</h2>
 
-                    <input
-                        id="owner"
-                        type="text"
-                        placeholder="microsoft"
-                        maxlength="39"
-                        required
+                <p class="card-description">
+
+                    Enter a public repository to retrieve its
+                    issues from the GitHub REST API.
+
+                </p>
+
+                <form id="importForm" class="form">
+
+                    <div class="field">
+
+                        <label for="owner">
+                            Repository owner
+                        </label>
+
+                        <input
+                            id="owner"
+                            type="text"
+                            placeholder="microsoft"
+                            maxlength="39"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="field">
+
+                        <label for="repo">
+                            Repository name
+                        </label>
+
+                        <input
+                            id="repo"
+                            type="text"
+                            placeholder="vscode"
+                            maxlength="100"
+                            required
+                        >
+
+                    </div>
+
+                    <button id="importBtn" type="submit">
+
+                        Import Issues
+
+                    </button>
+
+                </form>
+
+                <p
+                    id="importStatus"
+                    class="status"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+            </section>
+
+            <!-- ==========================================
+                 IMPORTED ISSUES SECTION
+                 ========================================== -->
+
+            <section class="card">
+
+                <div class="toolbar">
+
+                    <div>
+
+                        <h2>Imported Issues</h2>
+
+                        <p class="count" id="issueCount">
+
+                            Loading...
+
+                        </p>
+
+                    </div>
+
+                    <button
+                        id="refreshBtn"
+                        class="secondary"
+                        type="button"
                     >
 
-                </div>
+                        Refresh
 
-                <div class="field">
-
-                    <label for="repo">
-                        Repository name
-                    </label>
-
-                    <input
-                        id="repo"
-                        type="text"
-                        placeholder="vscode"
-                        maxlength="100"
-                        required
-                    >
+                    </button>
 
                 </div>
 
-                <button id="importBtn" type="submit">
-                    Import Issues
-                </button>
+                <div class="table-wrap">
 
-            </form>
+                    <table>
 
-            <p
-                id="importStatus"
-                class="status"
-                role="status"
-                aria-live="polite"
-            ></p>
+                        <thead>
 
-        </section>
+                            <tr>
 
-        <!-- MYSQL RESULTS SECTION -->
+                                <th>Repository</th>
+                                <th>Issue #</th>
+                                <th>Title</th>
+                                <th>Username</th>
+                                <th>State</th>
+                                <th>GitHub</th>
 
-        <section class="card">
+                            </tr>
 
-            <div class="toolbar">
+                        </thead>
 
-                <div>
-                    <h2>Imported Issues</h2>
+                        <tbody id="issuesBody"></tbody>
 
-                    <p class="count" id="issueCount">
-                        Loading...
-                    </p>
+                    </table>
+
                 </div>
 
-                <button
-                    id="refreshBtn"
-                    class="secondary"
-                    type="button"
-                >
-                    Refresh
-                </button>
+            </section>
 
-            </div>
+        </div>
 
-            <div class="table-wrap">
-
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th>Repository</th>
-                            <th>Issue #</th>
-                            <th>Title</th>
-                            <th>State</th>
-                            <th>GitHub</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="issuesBody"></tbody>
-
-                </table>
-
-            </div>
-
-        </section>
-
-    </div></main>
+    </main>
 
     <script>
 
-        // ==================================
-        // ELEMENTS
-        // ==================================
+        // ==========================================
+        // 1. ELEMENTS
+        // ==========================================
 
         const importForm =
             document.getElementById("importForm");
@@ -349,12 +406,14 @@
         const refreshBtn =
             document.getElementById("refreshBtn");
 
-        // ==================================
-        // LOAD CURRENT USER
-        // ==================================
+        // ==========================================
+        // 2. LOAD CURRENT USER
+        // ==========================================
 
         async function loadCurrentUser() {
+
             try {
+
                 const response = await fetch(
                     "/api/auth/me",
                     {
@@ -364,38 +423,47 @@
                 );
 
                 if (response.status === 401) {
+
                     window.location.href = "/login";
+
                     return;
                 }
 
                 if (!response.ok) {
+
                     throw new Error("Could not load user.");
                 }
 
                 const result = await response.json();
 
                 if (result.user) {
+
                     document.getElementById(
                         "currentUser"
                     ).textContent =
+
                         "Signed in as " +
                         result.user.username +
                         " (" + result.user.role + ").";
+
                 }
 
             } catch (error) {
+
                 console.error(
                     "Account lookup failed:",
                     error
                 );
+
             }
         }
 
-        // ==================================
-        // DISPLAY TABLE CELL SAFELY
-        // ==================================
+        // ==========================================
+        // 3. DISPLAY TABLE CELL SAFELY
+        // ==========================================
 
         function addCell(row, value) {
+
             const cell = document.createElement("td");
 
             cell.textContent =
@@ -408,15 +476,81 @@
             return cell;
         }
 
-        // ==================================
-        // GET IMPORTED ISSUES FROM MYSQL
+        // ==========================================
+        // 4. DISPLAY GITHUB USERNAME
+        // ==========================================
+
+        function addUsernameCell(row, username) {
+
+            const cell = document.createElement("td");
+
+            if (
+                typeof username !== "string" ||
+                !username.trim()
+            ) {
+
+                const unknown =
+                    document.createElement("span");
+
+                unknown.className = "unknown-user";
+
+                unknown.textContent = "Unknown";
+
+                cell.appendChild(unknown);
+
+                row.appendChild(cell);
+
+                return;
+            }
+
+            // Standard GitHub usernames.
+            // Bot accounts or other names are displayed
+            // as plain text if they fail validation.
+
+            if (
+                !/^[a-zA-Z0-9-]{1,39}$/.test(username)
+            ) {
+
+                cell.textContent = "@" + username;
+
+                row.appendChild(cell);
+
+                return;
+            }
+
+            // Create clickable GitHub profile link.
+
+            const link = document.createElement("a");
+
+            link.className = "github-username";
+
+            link.href =
+                "https://github.com/" +
+                encodeURIComponent(username);
+
+            link.target = "_blank";
+
+            link.rel = "noopener noreferrer";
+
+            link.textContent = "@" + username;
+
+            cell.appendChild(link);
+
+            row.appendChild(cell);
+        }
+
+        // ==========================================
+        // 5. GET IMPORTED ISSUES FROM MYSQL
         // GET /api/github/issues
-        // ==================================
+        // ==========================================
 
         async function loadIssues() {
 
             issueCount.textContent = "Loading issues...";
+
             issuesBody.replaceChildren();
+
+            refreshBtn.disabled = true;
 
             try {
 
@@ -429,11 +563,14 @@
                 );
 
                 if (response.status === 401) {
+
                     window.location.href = "/login";
+
                     return;
                 }
 
                 if (!response.ok) {
+
                     throw new Error(
                         "Could not retrieve imported issues."
                     );
@@ -442,6 +579,7 @@
                 const result = await response.json();
 
                 if (!result.success) {
+
                     throw new Error(
                         result.message || "Request failed."
                     );
@@ -453,8 +591,15 @@
                         : [];
 
                 issueCount.textContent =
+
                     String(issues.length) +
-                    " saved issues displayed";
+                    (issues.length === 1
+                        ? " saved issue displayed"
+                        : " saved issues displayed");
+
+                // ======================================
+                // EMPTY TABLE
+                // ======================================
 
                 if (issues.length === 0) {
 
@@ -464,16 +609,23 @@
                     const cell =
                         document.createElement("td");
 
-                    cell.colSpan = 5;
+                    cell.colSpan = 6;
+
                     cell.className = "empty";
+
                     cell.textContent =
                         "No imported issues found.";
 
                     row.appendChild(cell);
+
                     issuesBody.appendChild(row);
 
                     return;
                 }
+
+                // ======================================
+                // DISPLAY ALL IMPORTED ISSUES
+                // ======================================
 
                 issues.forEach(issue => {
 
@@ -481,45 +633,66 @@
                         document.createElement("tr");
 
                     // Repository
+
                     addCell(
                         row,
                         issue.repo_owner + "/" +
                         issue.repo_name
                     );
 
-                    // GitHub issue number
+                    // Issue number
+
                     addCell(
                         row,
                         "#" + issue.issue_number
                     );
 
-                    // Title
+                    // Issue title
+
                     addCell(row, issue.title);
 
-                    // State
+                    // ==================================
+                    // NEW: GITHUB ISSUE AUTHOR
+                    // ==================================
+
+                    addUsernameCell(
+                        row,
+                        issue.github_username
+                    );
+
+                    // ==================================
+                    // ISSUE STATE
+                    // ==================================
+
                     const stateCell =
                         document.createElement("td");
 
                     const stateLabel =
                         document.createElement("span");
 
-                    stateLabel.className =
-                        "state " +
-                        (issue.state === "closed"
-                            ? "closed"
-                            : "open");
+                    const state =
+                        ["open", "closed"].includes(issue.state)
+                            ? issue.state
+                            : "unknown";
 
-                    stateLabel.textContent =
-                        issue.state || "unknown";
+                    stateLabel.className =
+                        "state " + state;
+
+                    stateLabel.textContent = state;
 
                     stateCell.appendChild(stateLabel);
+
                     row.appendChild(stateCell);
 
-                    // Safe link
+                    // ==================================
+                    // SAFE GITHUB ISSUE LINK
+                    // ==================================
+
                     const linkCell =
                         document.createElement("td");
 
                     try {
+
                         const url = new URL(
                             issue.issue_url
                         );
@@ -528,43 +701,58 @@
                             url.protocol === "https:" &&
                             url.hostname === "github.com"
                         ) {
+
                             const link =
                                 document.createElement("a");
 
                             link.href = url.href;
+
                             link.target = "_blank";
+
                             link.rel =
                                 "noopener noreferrer";
+
                             link.textContent =
                                 "View Issue";
 
                             linkCell.appendChild(link);
                         }
+
                     } catch (error) {
-                        // Invalid external URL:
-                        // do not create a link.
+
+                        // Invalid URLs are ignored.
+
                     }
 
                     row.appendChild(linkCell);
 
                     issuesBody.appendChild(row);
+
                 });
 
             } catch (error) {
 
                 issueCount.textContent =
+
                     error.message ||
                     "Failed to load issues.";
+
+            } finally {
+
+                refreshBtn.disabled = false;
+
             }
         }
 
-        // ==================================
-        // IMPORT PUBLIC GITHUB ISSUES
+        // ==========================================
+        // 6. IMPORT PUBLIC GITHUB ISSUES
         // POST /api/github/import
-        // ==================================
+        // ==========================================
 
         importForm.addEventListener(
+
             "submit",
+
             async event => {
 
                 event.preventDefault();
@@ -577,34 +765,48 @@
                     document.getElementById("repo")
                         .value.trim();
 
-                // Basic frontend validation
+                // ======================================
+                // FRONTEND VALIDATION
+                // ======================================
+
                 if (
                     !/^[a-zA-Z0-9-]{1,39}$/.test(owner) ||
-                    !/^[a-zA-Z0-9_.-]{1,100}$/.test(repo)
+                    !/^[a-zA-Z0-9_.-]{1,100}$/.test(repo) ||
+                    repo === "." ||
+                    repo === ".."
                 ) {
+
                     importStatus.style.color = "#f87171";
+
                     importStatus.textContent =
                         "Enter a valid GitHub owner and repository.";
+
                     return;
                 }
 
                 importBtn.disabled = true;
 
                 importStatus.style.color = "#a9a9b8";
+
                 importStatus.textContent =
                     "Contacting GitHub API...";
 
                 try {
 
                     const response = await fetch(
+
                         "/api/github/import",
+
                         {
                             method: "POST",
+
                             headers: {
                                 "Content-Type":
                                     "application/json"
                             },
+
                             credentials: "same-origin",
+
                             body: JSON.stringify({
                                 owner: owner,
                                 repo: repo
@@ -613,79 +815,114 @@
                     );
 
                     if (response.status === 401) {
+
                         window.location.href = "/login";
+
                         return;
                     }
 
                     const result = await response.json();
 
-                    if (!response.ok) {
+                    if (!response.ok || !result.success) {
+
                         throw new Error(
                             result.message ||
                             "GitHub import failed."
                         );
                     }
 
-                    importStatus.style.color = "#86efac";
-                    importStatus.textContent =
-                        "Import completed for " +
-                        owner + "/" + repo +
-                        ". Saved issues are shown below.";
+                    // ==================================
+                    // SUCCESS MESSAGE
+                    // ==================================
 
-                    // Refresh the MySQL results via AJAX
+                    importStatus.style.color = "#86efac";
+
+                    importStatus.textContent =
+
+                        "Import completed for " +
+
+                        (result.repository ||
+                            owner + "/" + repo) +
+
+                        ". " +
+
+                        Number(result.imported || 0) +
+
+                        " open issues synchronized. " +
+
+                        Number(result.deleted || 0) +
+
+                        " closed issues removed.";
+
+                    // Refresh the table without
+                    // reloading the webpage.
+
                     await loadIssues();
 
                 } catch (error) {
 
                     importStatus.style.color = "#f87171";
+
                     importStatus.textContent =
+
                         error.message ||
                         "Import failed.";
 
                 } finally {
-                    importBtn.disabled = false;
-                }
 
+                    importBtn.disabled = false;
+
+                }
             }
         );
 
-        // ==================================
-        // REFRESH WITHOUT RELOADING PAGE
-        // ==================================
+        // ==========================================
+        // 7. REFRESH WITHOUT RELOADING
+        // ==========================================
 
         refreshBtn.addEventListener(
             "click",
             loadIssues
         );
 
-        // ==================================
-        // INITIAL PAGE LOAD
-        // ==================================
-
+        // ==========================================
+        // 8. INITIAL PAGE LOAD
+        // ==========================================
 
         (async () => {
+
             try {
+
                 await BugPilotLayout.mount({
+
                     active: "github",
+
                     title: "GitHub Issues",
+
                     subtitle:
                         "Import public GitHub issues into BugPilot AI.",
+
                     breadcrumb: ["GitHub Issues"]
+
                 });
 
                 await loadCurrentUser();
+
                 await loadIssues();
 
             } catch (error) {
+
                 console.error(
                     "GitHub page failed to load:",
                     error
                 );
-            }
-        })();
 
+            }
+
+        })();
 
     </script>
 
 </body>
+
 </html>
