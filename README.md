@@ -24,6 +24,7 @@ Built as a database management project at **Ontario Tech University**.
 - **REST API** — CRUD operations for issues and projects.
 - **Rate Limiting** — Protect GitHub import endpoints from excessive requests.
 - **Startup Script** — Launch BugPilot AI using a single terminal command.
+- **Cross-Platform Startup** — Run BugPilot AI on macOS and Windows using Node.js.
 
 ---
 
@@ -38,6 +39,7 @@ Built as a database management project at **Ontario Tech University**.
 | External API | GitHub REST API |
 | Data Export | CSV, PDF |
 | Version Control | Git, GitHub |
+| Operating Systems | macOS, Windows |
 
 ---
 
@@ -45,37 +47,82 @@ Built as a database management project at **Ontario Tech University**.
 
 Before running BugPilot AI, ensure you have installed:
 
-- Node.js 18 or newer
+- Node.js 18 or newer (a supported LTS version is recommended)
 - npm
 - MySQL Server
 - MySQL Workbench
 - Git
-- Bash (for the startup script)
 - Visual Studio Code (recommended)
+
+### Download Links
+
+| Software | Download |
+|---|---|
+| Node.js | https://nodejs.org/ |
+| MySQL Server | https://dev.mysql.com/downloads/mysql/ |
+| MySQL Workbench | https://dev.mysql.com/downloads/workbench/ |
+| Git | https://git-scm.com/downloads |
+| Visual Studio Code | https://code.visualstudio.com/ |
+
+### Supported Terminals
+
+| Operating System | Terminal |
+|---|---|
+| macOS | Terminal, Zsh, Bash |
+| Windows | PowerShell |
+| Windows | Command Prompt (CMD) |
+| Windows | Git Bash |
+
+Git Bash is optional on Windows.
 
 ---
 
 ## 🚀 Quick Start
 
-### macOS — Existing Local Installation
+If BugPilot AI V2 is already installed and configured, use the appropriate command for your operating system.
 
-If BugPilot AI V2 is already installed inside your Documents folder, run:
+### 🍎 macOS
+
+Open Terminal or the VS Code terminal and run:
 
 ```bash
 cd ~/Documents/BugPilot-AI-V2 && bash start-bugpilot.sh
 ```
 
-This command:
+### 🪟 Windows — PowerShell
 
-1. Navigates to the BugPilot AI V2 project directory.
-2. Executes the startup shell script.
-3. Launches the application if the required dependencies and database are configured.
+Open PowerShell or the VS Code PowerShell terminal and run:
+
+```powershell
+Set-Location "$HOME\Documents\BugPilot-AI-V2\backend"
+node server.js
+```
+
+### 🪟 Windows — Command Prompt
+
+Open Command Prompt and run:
+
+```cmd
+cd /d "%USERPROFILE%\Documents\BugPilot-AI-V2\backend" && node server.js
+```
+
+### 🪟 Windows — Git Bash
+
+Open Git Bash and run:
+
+```bash
+cd ~/Documents/BugPilot-AI-V2/backend && node server.js
+```
+
+These commands assume that the project is installed inside your Documents folder.
+
+If your project is installed somewhere else, including OneDrive Documents, use its actual directory instead.
 
 Once the application starts, open:
 
 http://localhost:3000
 
-**For first-time installations, complete the installation steps below before running the application.**
+**First-time users must complete the installation and configuration steps below.**
 
 ---
 
@@ -83,47 +130,98 @@ http://localhost:3000
 
 ### 1. Clone the Repository
 
-Open your terminal and run:
+#### macOS
 
 ```bash
 cd ~/Documents
-
 git clone https://github.com/weeshan/BugPilot-AI.git BugPilot-AI-V2
-
 cd BugPilot-AI-V2
 ```
 
-The project will now be located at:
+#### Windows — PowerShell
 
-```text
-~/Documents/BugPilot-AI-V2
+```powershell
+Set-Location ([Environment]::GetFolderPath("MyDocuments"))
+git clone https://github.com/weeshan/BugPilot-AI.git BugPilot-AI-V2
+Set-Location BugPilot-AI-V2
 ```
+
+#### Windows — Command Prompt
+
+```cmd
+cd /d "%USERPROFILE%\Documents"
+git clone https://github.com/weeshan/BugPilot-AI.git BugPilot-AI-V2
+cd BugPilot-AI-V2
+```
+
+#### Windows — Git Bash
+
+```bash
+cd ~/Documents
+git clone https://github.com/weeshan/BugPilot-AI.git BugPilot-AI-V2
+cd BugPilot-AI-V2
+```
+
+If the project already exists on your computer, you do not need to clone it again.
 
 ---
 
 ### 2. Install Dependencies
 
+The following commands work on macOS and Windows.
+
 From the root directory of the project, run:
 
 ```bash
 cd backend
-
 npm ci
-
 cd ..
 ```
 
 This installs the required Node.js dependencies.
 
+If Windows PowerShell blocks npm scripts, use:
+
+```powershell
+cd backend
+npm.cmd ci
+cd ..
+```
+
 ---
 
 ### 3. Set Up MySQL
 
-Start your MySQL server and open MySQL Workbench.
+#### macOS
 
-Locate the complete SQL database setup file inside the project's `database/` directory.
+Start your MySQL server using your existing MySQL installation.
 
-Open the SQL file in MySQL Workbench and execute it if you are installing BugPilot AI for the first time.
+If MySQL was installed through Homebrew, you may use:
+
+```bash
+brew services start mysql
+```
+
+If MySQL was installed through the official MySQL installer, start it through its system settings or installed management tools.
+
+#### Windows
+
+1. Press `Windows + R`.
+2. Enter `services.msc`.
+3. Locate your installed MySQL service, such as `MySQL80` or `MySQL84`.
+4. Right-click the service.
+5. Select **Start** if it is not already running.
+
+The exact service name depends on your MySQL installation.
+
+#### Database Setup — Both Operating Systems
+
+1. Open MySQL Workbench.
+2. Connect to your local MySQL server.
+3. Locate the complete SQL database setup file inside the project's `database/` directory.
+4. Open the SQL file in MySQL Workbench.
+5. Execute the complete SQL script for a new database.
+6. Refresh the Schemas panel.
 
 The database name is:
 
@@ -140,7 +238,7 @@ The database includes:
 - GitHub authentication fields
 - GitHub imported issue author usernames
 - Unique GitHub account constraints
-- Database migration commands
+- Conditional database migration commands
 
 #### New Database Installation
 
@@ -203,9 +301,16 @@ GITHUB_CALLBACK_URL=http://localhost:3000/api/auth/github/callback
 
 Replace the placeholder values with your own credentials.
 
+For example, if your local MySQL username is `root`, configure:
+
+```env
+DB_USER=root
+DB_PASSWORD=your_actual_mysql_password
+```
+
 The session secret must contain at least 32 characters.
 
-You can generate a secure session secret using:
+Generate a secure session secret using the following command on macOS or Windows:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -238,6 +343,7 @@ Copy the generated Client ID and Client Secret into your `.env` file:
 ```env
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_CALLBACK_URL=http://localhost:3000/api/auth/github/callback
 ```
 
 Keep these credentials private.
@@ -246,9 +352,9 @@ Keep these credentials private.
 
 ## ▶️ Running BugPilot AI
 
-There are multiple ways to start the application.
+Make sure MySQL is running, the database has been initialized, Node.js dependencies are installed, and your `.env` file has been configured.
 
-### Option 1 — Quick Startup on macOS (Recommended)
+### 🍎 Option 1 — macOS Automatic Startup
 
 If the project is installed inside your Documents folder, run:
 
@@ -260,31 +366,22 @@ This command works regardless of your current terminal directory, provided the p
 
 No `chmod` command is required when executing the script using `bash`.
 
----
-
-### Option 2 — Startup Script from the Project Root
-
-If your terminal is already inside the `BugPilot-AI-V2` directory, run:
+Alternatively, from the root directory of the project:
 
 ```bash
 bash start-bugpilot.sh
 ```
 
-Your terminal must be inside the main project directory, not the `backend` directory.
-
 ---
 
-### Option 3 — Manual Startup
-
-Run:
+### 🍎 Option 2 — macOS Manual Startup
 
 ```bash
 cd ~/Documents/BugPilot-AI-V2/backend
-
 node server.js
 ```
 
-Alternatively, if you are already inside the backend directory:
+If you are already inside the backend directory:
 
 ```bash
 node server.js
@@ -292,25 +389,79 @@ node server.js
 
 ---
 
-### Option 4 — Other Installation Locations
+### 🪟 Option 3 — Windows PowerShell (Recommended)
 
-If you cloned the project somewhere other than your Documents folder, navigate to your actual project directory and run:
+Open PowerShell or the VS Code PowerShell terminal.
 
-```bash
-bash start-bugpilot.sh
+Run:
+
+```powershell
+Set-Location "$HOME\Documents\BugPilot-AI-V2\backend"
+node server.js
 ```
 
-For Windows users, the startup script requires a compatible Bash environment, such as Git Bash.
+If your Documents folder is redirected to OneDrive or another location, use:
 
-Alternatively, use Node.js directly from the backend directory:
+```powershell
+Set-Location (Join-Path ([Environment]::GetFolderPath("MyDocuments")) "BugPilot-AI-V2\backend")
+node server.js
+```
 
-```bash
+If you are already inside the root directory of the project:
+
+```powershell
+cd backend
+node server.js
+```
+
+If you are already inside the backend directory:
+
+```powershell
 node server.js
 ```
 
 ---
 
-### Successful Startup
+### 🪟 Option 4 — Windows Command Prompt
+
+Open Command Prompt and run:
+
+```cmd
+cd /d "%USERPROFILE%\Documents\BugPilot-AI-V2\backend" && node server.js
+```
+
+If you are already inside the root project directory:
+
+```cmd
+cd backend
+node server.js
+```
+
+---
+
+### 🪟 Option 5 — Windows Git Bash
+
+Git Bash is installed alongside Git for Windows when selected during installation.
+
+Open Git Bash and run:
+
+```bash
+cd ~/Documents/BugPilot-AI-V2/backend && node server.js
+```
+
+The macOS shell script may also work through Git Bash if it does not depend on macOS-specific commands.
+
+To attempt shell-script startup from Git Bash:
+
+```bash
+cd ~/Documents/BugPilot-AI-V2 && bash start-bugpilot.sh
+```
+
+If the shell script is incompatible with your Windows installation, use the manual Node.js startup method instead.
+
+---
+
+### ✅ Successful Startup
 
 When the backend starts successfully, the terminal should display:
 
@@ -324,11 +475,19 @@ Open BugPilot AI in your browser:
 
 http://localhost:3000
 
+The application can be accessed using:
+
+- Google Chrome
+- Brave
+- Microsoft Edge
+- Firefox
+- Safari
+
 ---
 
-### Stop the Application
+### 🛑 Stop the Application
 
-To stop the Node.js server, return to the terminal where the application is running and press:
+To stop the Node.js server on macOS or Windows, return to the terminal where the application is running and press:
 
 ```text
 Ctrl + C
@@ -342,11 +501,34 @@ Users can create an account through the BugPilot AI registration page.
 
 GitHub authentication is also supported.
 
-To manually provision a user account, run:
+To manually provision a user account, use the existing `create-user.js` script.
+
+### macOS
 
 ```bash
 cd ~/Documents/BugPilot-AI-V2/backend
+node create-user.js
+```
 
+### Windows — PowerShell
+
+```powershell
+Set-Location "$HOME\Documents\BugPilot-AI-V2\backend"
+node create-user.js
+```
+
+### Windows — Command Prompt
+
+```cmd
+cd /d "%USERPROFILE%\Documents\BugPilot-AI-V2\backend"
+node create-user.js
+```
+
+### From the Backend Directory
+
+The following command works on both operating systems:
+
+```bash
 node create-user.js
 ```
 
@@ -441,7 +623,7 @@ The application currently allows:
 
 - 20 import requests per minute per IP address.
 
-GitHub also enforces its own API rate limits, independently of BugPilot AI.
+GitHub also enforces its own API rate limits independently of BugPilot AI.
 
 ---
 
@@ -542,6 +724,45 @@ The `.env` file must be created locally and must not be committed to GitHub.
 
 ---
 
+## 🔄 Updating an Existing Installation
+
+If a teammate has already cloned BugPilot AI, they can retrieve the latest version without cloning the repository again.
+
+### macOS
+
+```bash
+cd ~/Documents/BugPilot-AI-V2
+git pull origin main
+cd backend
+npm ci
+```
+
+### Windows — PowerShell
+
+```powershell
+Set-Location "$HOME\Documents\BugPilot-AI-V2"
+git pull origin main
+cd backend
+npm ci
+```
+
+### Windows — Command Prompt
+
+```cmd
+cd /d "%USERPROFILE%\Documents\BugPilot-AI-V2"
+git pull origin main
+cd backend
+npm ci
+```
+
+If Git reports conflicting local changes, resolve those changes before continuing.
+
+If the update includes database schema changes, execute the required SQL migration section in MySQL Workbench.
+
+Restart the application after updating.
+
+---
+
 ## 🛠️ Troubleshooting
 
 ### Error: start-bugpilot.sh: No such file or directory
@@ -550,22 +771,53 @@ This error occurs when the terminal cannot locate the startup script.
 
 The startup script is located in the root project directory, not inside the backend directory.
 
-For macOS installations inside Documents, run:
+#### macOS
 
 ```bash
 cd ~/Documents/BugPilot-AI-V2 && bash start-bugpilot.sh
 ```
 
-To check your current terminal directory, run:
+#### Windows
+
+Use the Node.js startup method:
+
+```powershell
+Set-Location "$HOME\Documents\BugPilot-AI-V2\backend"
+node server.js
+```
+
+To check your current terminal directory:
+
+macOS or Git Bash:
 
 ```bash
 pwd
 ```
 
-To list the files in your current directory, run:
+Windows PowerShell:
+
+```powershell
+Get-Location
+```
+
+Windows Command Prompt:
+
+```cmd
+cd
+```
+
+To list the files in your current directory:
+
+macOS or Git Bash:
 
 ```bash
 ls
+```
+
+Windows PowerShell or Command Prompt:
+
+```cmd
+dir
 ```
 
 ---
@@ -636,6 +888,87 @@ Verify that:
 - The `.env` file is inside the backend directory.
 - The database name is `bug_tracking_phase2`.
 
+#### macOS — Homebrew MySQL Installation
+
+```bash
+brew services list
+```
+
+Start MySQL if required:
+
+```bash
+brew services start mysql
+```
+
+#### Windows
+
+Open Windows Services:
+
+```text
+Windows + R
+```
+
+Enter:
+
+```text
+services.msc
+```
+
+Locate and start your installed MySQL service.
+
+---
+
+### Error: node is not recognized
+
+This usually means Node.js is not installed or is not available in your system PATH.
+
+Install Node.js from:
+
+https://nodejs.org/
+
+Restart your terminal or Visual Studio Code.
+
+Verify the installation:
+
+```bash
+node -v
+npm -v
+```
+
+These commands work on macOS and Windows.
+
+---
+
+### Error: npm.ps1 cannot be loaded because running scripts is disabled
+
+This error may occur in Windows PowerShell.
+
+Instead of changing your system's execution policy, run:
+
+```powershell
+npm.cmd ci
+```
+
+Alternatively, open a Command Prompt terminal and run:
+
+```cmd
+npm ci
+```
+
+---
+
+### Error: Cannot find module
+
+The required Node.js dependencies may not be installed.
+
+From the root project directory, run:
+
+```bash
+cd backend
+npm ci
+node server.js
+```
+
 ---
 
 ### Error: Port 3000 Is Already in Use
@@ -648,11 +981,75 @@ Stop the previous server using:
 Ctrl + C
 ```
 
-Then restart the application:
+#### macOS Restart
 
 ```bash
 cd ~/Documents/BugPilot-AI-V2 && bash start-bugpilot.sh
 ```
+
+#### Windows Restart
+
+```powershell
+Set-Location "$HOME\Documents\BugPilot-AI-V2\backend"
+node server.js
+```
+
+---
+
+### Error: GitHub Login Failed
+
+Verify that:
+
+- The GitHub OAuth Client ID is correct.
+- The GitHub OAuth Client Secret is correct.
+- The callback URL matches your GitHub OAuth App configuration.
+- The application is running on the configured port.
+- Your internet connection is working.
+
+The expected callback URL for the default local setup is:
+
+```text
+http://localhost:3000/api/auth/github/callback
+```
+
+---
+
+## ⚡ Quick Command Reference
+
+### macOS
+
+| Task | Command |
+|---|---|
+| Start BugPilot AI | `cd ~/Documents/BugPilot-AI-V2 && bash start-bugpilot.sh` |
+| Start from project root | `bash start-bugpilot.sh` |
+| Start manually from backend | `node server.js` |
+| Create user from backend | `node create-user.js` |
+| Install dependencies from backend | `npm ci` |
+| Check current directory | `pwd` |
+| Stop server | `Ctrl + C` |
+
+### Windows — PowerShell
+
+| Task | Command |
+|---|---|
+| Navigate to backend | `Set-Location "$HOME\Documents\BugPilot-AI-V2\backend"` |
+| Start BugPilot AI from backend | `node server.js` |
+| Create user from backend | `node create-user.js` |
+| Install dependencies from backend | `npm ci` |
+| Install if npm scripts are blocked | `npm.cmd ci` |
+| Check current directory | `Get-Location` |
+| Stop server | `Ctrl + C` |
+
+### Windows — Command Prompt
+
+| Task | Command |
+|---|---|
+| Start BugPilot AI | `cd /d "%USERPROFILE%\Documents\BugPilot-AI-V2\backend" && node server.js` |
+| Start manually from backend | `node server.js` |
+| Create user from backend | `node create-user.js` |
+| Install dependencies from backend | `npm ci` |
+| Check current directory | `cd` |
+| Stop server | `Ctrl + C` |
 
 ---
 
@@ -667,24 +1064,11 @@ cd ~/Documents/BugPilot-AI-V2 && bash start-bugpilot.sh
 | Database | MySQL |
 | Application Type | Full-Stack Web Application |
 | External Integration | GitHub REST API and GitHub OAuth |
+| Operating Systems | macOS and Windows |
 
 **GitHub:** [@weeshan](https://github.com/weeshan)
 
 **Repository:** [BugPilot AI](https://github.com/weeshan/BugPilot-AI)
-
----
-
-## ⚡ Quick Command Reference
-
-| Task | Command |
-|---|---|
-| Start BugPilot AI | `cd ~/Documents/BugPilot-AI-V2 && bash start-bugpilot.sh` |
-| Start from project root | `bash start-bugpilot.sh` |
-| Start manually from backend | `node server.js` |
-| Create user from backend | `node create-user.js` |
-| Install dependencies from backend | `npm ci` |
-| Check current directory | `pwd` |
-| Stop server | `Ctrl + C` |
 
 ---
 
